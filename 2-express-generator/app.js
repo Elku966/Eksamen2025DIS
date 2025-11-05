@@ -18,8 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/checkout', checkoutRouter);
-
-
 app.use('/', indexRouter);
 
 module.exports = app;
+

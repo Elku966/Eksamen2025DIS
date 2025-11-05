@@ -6,154 +6,213 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
 
-    :root{
-      --bg: #f4f7f6;      
-      --card: #ffffff;      
-      --text: #20312c;     
-      --muted: #5c6e68;     
-      --primary: #2f6f60;   
-      --primary-hover:#275b4e;
-      --border:#dfe7e4;    
+    :root {
+      --baggrund: #f4f7f6;      
+      --kort: #ffffff;      
+      --tekst: #20312c;     
+      --dæmpet: #5c6e68;     
+      --primær: #2f6f60;   
+      --primær-hover: #275b4e;
+      --kant: #dfe7e4;    
     }
 
-   
-    *{ box-sizing: border-box; }
-    body{
-      margin:0; padding:0;
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: var(--bg);
-      display:flex; align-items:center; justify-content:center;
-      min-height:100vh;
+      color: var(--tekst);
+      background: var(--baggrund);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
     }
 
-    .wrap{
-      width: 92%;
-      max-width: 520px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 22px;
-    }
-
-    h1{
-      margin: 4px 0 6px;
-      font-size: 1.4rem;
-    }
-    .sub{
-      margin:0 0 16px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    label{ display:block; margin: 12px 0 6px; font-weight: 600; }
-    input{
+    /* 🔹 Baggrundsvideo */
+    .video-baggrund {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .video-baggrund iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 120vw;
+      height: 120vh;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* 🔹 Mindre, kompakt boks */
+    .indhold {
+      width: 92%;
+      max-width: 460px; /* mindre max bredde */
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 14px;
+      padding: 24px 26px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.4rem;
+      text-align: center;
+    }
+
+    .undertekst {
+      margin: 0 0 16px;
+      color: var(--dæmpet);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    label { 
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--kant);
       border-radius: 8px;
       font-size: 1rem;
-      color: var(--text);
+      color: var(--tekst);
       background: #fff;
       outline: none;
     }
-    input:focus{ border-color: var(--primary); }
 
-    .row{ margin-top: 6px; }
-    .checkbox{
-      display:flex; align-items:center; gap:10px;
-      margin-top: 12px; color: var(--muted); font-weight: 500;
+    input:focus { border-color: var(--primær); }
+
+    /* 🔹 Flueben-område venstrestillet */
+    .afkrydsning {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-start;
+      margin-top: 14px;
+      color: var(--dæmpet);
+      font-weight: 500;
     }
 
     button {
-  background-color: #DDF291;  
-  color: #16361C;             
-  border: none;
-  border-radius: 25px;       
-  padding: 15px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  width: 100%;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-button:hover {
-  background-color: #c8e87d;  }
-
-    #status{
-      margin-top:12px;
-      font-weight:600;
-      color: var(--muted);
+      background-color: #DDF291;
+      color: #16361C;
+      border: none;
+      border-radius: 25px;
+      padding: 13px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 16px;
     }
+
+    button:hover {
+      background-color: #c8e87d;
+    }
+
+    #besked {
+      margin-top: 10px;
+      font-weight: 600;
+      color: var(--dæmpet);
+      text-align: center;
+    }
+
   </style>
 </head>
+
 <body>
-  <div class="wrap">
+
+  <!-- 🎬 YouTube-baggrundsvideo -->
+  <div class="video-baggrund">
+    <iframe
+      src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
+      frameborder="0"
+      allow="autoplay; fullscreen"
+      allowfullscreen
+    ></iframe>
+  </div>
+
+  <!-- 🧾 Indhold -->
+  <div class="indhold">
     <h1>Afslut din booking</h1>
-    <p class="sub">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
+    <p class="undertekst">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
 
-    <form id="bookingForm">
-      <label for="name">Navn</label>
-      <input id="name" type="text" required>
+    <form id="booking-formular">
+      <label for="navn">Navn</label>
+      <input id="navn" type="text" required>
 
-      <label for="date">Dato</label>
-      <input id="date" type="date" required>
+      <label for="dato">Dato</label>
+      <input id="dato" type="date" required>
 
-      <label for="time">Tidspunkt</label>
-      <input id="time" type="time" required>
+      <label for="tid">Tidspunkt</label>
+      <input id="tid" type="time" required>
 
-      <label for="location">Sted</label>
-      <input id="location" type="text" required>
+      <label for="sted">Sted</label>
+      <input id="sted" type="text" required>
 
-      <label for="phone">Telefon</label>
-      <input id="phone" type="tel" placeholder="+45xxxxxxxx" required>
+      <label for="telefon">Telefon</label>
+      <input id="telefon" type="tel" placeholder="+45xxxxxxxx" required>
 
-      <div class="checkbox">
-        <input id="smsReminder" type="checkbox">
-        <label for="smsReminder" style="margin:0; font-weight:500;">Ja tak, send SMS-påmindelse</label>
+      <div class="afkrydsning">
+        <input id="sms-påmindelse" type="checkbox">
+        <label for="sms-påmindelse" style="margin:0; font-weight:500;">Ja tak, send SMS-påmindelse</label>
       </div>
 
       <button type="submit">Bekræft booking</button>
     </form>
 
-    <p id="status"></p>
+    <p id="besked"></p>
   </div>
 
   <script>
-    document.getElementById('bookingForm').addEventListener('submit', async function (e){
+    document.getElementById('booking-formular').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const smsReminder = document.getElementById('smsReminder').checked;
-      const status = document.getElementById('status');
+      const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
+      const besked = document.getElementById('besked');
 
       const data = {
-        name: document.getElementById('name').value,
-        date: document.getElementById('date').value,
-        time: document.getElementById('time').value,
-        location: document.getElementById('location').value,
-        phone: document.getElementById('phone').value
+        navn: document.getElementById('navn').value,
+        dato: document.getElementById('dato').value,
+        tid: document.getElementById('tid').value,
+        sted: document.getElementById('sted').value,
+        telefon: document.getElementById('telefon').value
       };
 
-      if(!smsReminder){
-        status.textContent = "Booking gemt - uden SMS-påmindelse.";
+      if (!smsPåmindelse) {
+        besked.textContent = "Booking gemt - uden SMS-påmindelse.";
         return;
       }
 
-      try{
+      try {
         const res = await fetch('/sms/send', {
           method: 'POST',
-          headers: { 'Content-Type':'application/json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
         const result = await res.json();
 
-        status.textContent = result.success
-          ? "SMS-påmindelse sendt "
+        besked.textContent = result.success
+          ? "SMS-påmindelse sendt"
           : "Kunne ikke sende SMS";
-      }catch(err){
+      } catch (err) {
         console.error(err);
-        status.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
+        besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
       }
     });
   </script>

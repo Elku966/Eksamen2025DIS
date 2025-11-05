@@ -5,7 +5,8 @@ var logger = require('morgan');
 require('dotenv').config();
 
 var indexRouter = require('./routes/index');
-var checkoutRouter = require('./routes/checkout'); // 👈 den nye router
+var checkoutRouter = require('./routes/checkout');
+
 
 var app = express();
 
@@ -18,6 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // routes
 app.use('/', indexRouter);
-app.use('/checkout', checkoutRouter); // 👈 /checkout + router.get('/')
+app.use('/', indexRouter);
+app.use('/checkout', checkoutRouter);  // ✅ giver /checkout og /checkout/gennemfoert
 
 module.exports = app;

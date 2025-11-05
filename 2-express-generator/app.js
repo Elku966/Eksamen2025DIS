@@ -7,7 +7,6 @@ require('dotenv').config();
 var indexRouter = require('./routes/index');
 var checkoutRouter = require('./routes/checkout');
 
-
 var app = express();
 
 // middleware
@@ -17,9 +16,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// routes
+
+app.use('/checkout', checkoutRouter);
+
+
 app.use('/', indexRouter);
-app.use('/', indexRouter);
-app.use('/checkout', checkoutRouter);  // ✅ giver /checkout og /checkout/gennemfoert
 
 module.exports = app;

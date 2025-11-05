@@ -95,21 +95,33 @@
 
     input:focus, textarea:focus { border-color: var(--primær); }
 
-    /* ✅ Flueben og tekst helt ude til venstre */
+    /* ✅ Checkbox-rækken: venstrejusteret og lidt længere ude */
     .afkrydsning {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 0;
-      margin-top: 10px;
+      gap: 8px;               /* afstand mellem boks og tekst */
+      margin: 12px 0 0 -100px; /* trækker hele rækken 14px mod venstre */
       color: var(--dæmpet);
       font-weight: 500;
-      margin-left: -12px; /* rykker hele feltet ud til venstre */
     }
 
     .afkrydsning input[type="checkbox"] {
-      margin-right: 4px; /* minimal afstand mellem boks og tekst */
-      transform: scale(1.1);
+      margin: 0;
+      transform: scale(1.15);
+      accent-color: var(--primær);
+      transition: transform 0.15s ease;
+    }
+
+    .afkrydsning input[type="checkbox"]:active {
+      transform: scale(1.25);
+    }
+
+    .afkrydsning label {
+      display: inline;
+      margin: 0;
+      white-space: nowrap;    /* holder teksten på én linje */
+      font-weight: 400;
     }
 
     button {
@@ -156,6 +168,7 @@
       margin-top: 6px;
       height: 40px;
       font-size: 0.9rem;
+      font-family: Arial, Helvetica, sans-serif;
     }
   </style>
 </head>

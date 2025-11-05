@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking - SMS-påmindelse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+
+    :root{
+      --bg: #f4f7f6;      
+      --card: #ffffff;      
+      --text: #20312c;     
+      --muted: #5c6e68;     
+      --primary: #2f6f60;   
+      --primary-hover:#275b4e;
+      --border:#dfe7e4;    
+    }
+
+   
+    *{ box-sizing: border-box; }
+    body{
+      margin:0; padding:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
+    }
+
+    .wrap{
+      width: 92%;
+      max-width: 520px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+
+    h1{
+      margin: 4px 0 6px;
+      font-size: 1.4rem;
+    }
+    .sub{
+      margin:0 0 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    label{ display:block; margin: 12px 0 6px; font-weight: 600; }
+    input{
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+    input:focus{ border-color: var(--primary); }
+
+    .row{ margin-top: 6px; }
+    .checkbox{
+      display:flex; align-items:center; gap:10px;
+      margin-top: 12px; color: var(--muted); font-weight: 500;
+    }
+
+    button{
+      width:100%;
+      margin-top:16px;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff; font-size: 1rem; font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover{ background: var(--primary-hover); }
+
+    #status{
+      margin-top:12px;
+      font-weight:600;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Afslut din booking</h1>
+    <p class="sub">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
+
+    <form id="bookingForm">
+      <label for="name">Navn</label>
+      <input id="name" type="text" required>
+
+      <label for="date">Dato</label>
+      <input id="date" type="date" required>
+
+      <label for="time">Tidspunkt</label>
+      <input id="time" type="time" required>
+
+      <label for="location">Sted</label>
+      <input id="location" type="text" required>
+
+      <label for="phone">Telefon</label>
+      <input id="phone" type="tel" placeholder="+45xxxxxxxx" required>
+
+      <div class="checkbox">
+        <input id="smsReminder" type="checkbox">
+        <label for="smsReminder" style="margin:0; font-weight:500;">Ja tak, send SMS-påmindelse</label>
+      </div>
+
+      <button type="submit">Bekræft booking</button>
+    </form>
+
+    <p id="status"></p>
+  </div>
+
+  <script>
+    document.getElementById('bookingForm').addEventListener('submit', async function (e){
+      e.preventDefault();
+
+      const smsReminder = document.getElementById('smsReminder').checked;
+      const status = document.getElementById('status');
+
+      const data = {
+        name: document.getElementById('name').value,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        location: document.getElementById('location').value,
+        phone: document.getElementById('phone').value
+      };
+
+      if(!smsReminder){
+        status.textContent = "Booking gemt - uden SMS-påmindelse.";
+        return;
+      }
+
+      try{
+        const res = await fetch('/sms/send', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        status.textContent = result.success
+          ? "SMS-påmindelse sendt "
+          : "Kunne ikke sende SMS";
+      }catch(err){
+        console.error(err);
+        status.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
+      }
+    });
+  </script>
+</body>
+</html>
+

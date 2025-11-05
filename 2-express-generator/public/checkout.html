@@ -5,10 +5,8 @@
   <title>Booking - SMS-påmindelse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-
     :root {
       --baggrund: #f4f7f6;      
-      --kort: #ffffff;      
       --tekst: #20312c;     
       --dæmpet: #5c6e68;     
       --primær: #2f6f60;   
@@ -31,7 +29,7 @@
       overflow: hidden;
     }
 
-    /* 🔹 Baggrundsvideo */
+    /* 🎬 Baggrundsvideo */
     .video-baggrund {
       position: fixed;
       top: 0;
@@ -52,59 +50,66 @@
       pointer-events: none;
     }
 
-    /* 🔹 Mindre, kompakt boks */
+    /* 📦 Boksen i midten */
     .indhold {
-      width: 92%;
-      max-width: 460px; /* mindre max bredde */
-      background: rgba(255, 255, 255, 0.88);
+      width: 90%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(255,255,255,0.3);
       border-radius: 14px;
-      padding: 24px 26px;
-      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+      padding: 20px 22px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
       backdrop-filter: blur(8px);
     }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: 1.4rem;
+      margin: 0 0 6px;
+      font-size: 1.3rem;
       text-align: center;
     }
 
     .undertekst {
-      margin: 0 0 16px;
+      margin: 0 0 14px;
       color: var(--dæmpet);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       text-align: center;
     }
 
     label { 
       display: block;
-      margin: 10px 0 5px;
+      margin: 8px 0 5px;
       font-weight: 600;
     }
 
-    input {
+    input, textarea {
       width: 100%;
-      padding: 9px 11px;
+      padding: 8px 10px;
       border: 1px solid var(--kant);
       border-radius: 8px;
       font-size: 1rem;
       color: var(--tekst);
       background: #fff;
       outline: none;
+      resize: none;
     }
 
-    input:focus { border-color: var(--primær); }
+    input:focus, textarea:focus { border-color: var(--primær); }
 
-    /* 🔹 Flueben-område venstrestillet */
+    /* ✅ Flueben og tekst helt ude til venstre */
     .afkrydsning {
       display: flex;
       align-items: center;
-      gap: 10px;
       justify-content: flex-start;
-      margin-top: 14px;
+      gap: 0;
+      margin-top: 10px;
       color: var(--dæmpet);
       font-weight: 500;
+      margin-left: -12px; /* rykker hele feltet ud til venstre */
+    }
+
+    .afkrydsning input[type="checkbox"] {
+      margin-right: 4px; /* minimal afstand mellem boks og tekst */
+      transform: scale(1.1);
     }
 
     button {
@@ -112,8 +117,8 @@
       color: #16361C;
       border: none;
       border-radius: 25px;
-      padding: 13px;
-      font-size: 1.05rem;
+      padding: 12px;
+      font-size: 1rem;
       font-weight: 600;
       width: 100%;
       cursor: pointer;
@@ -132,12 +137,31 @@
       text-align: center;
     }
 
+    /* ✍️ Bemærkningsfelt */
+    .bemærkning-knap {
+      color: var(--primær);
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .bemærkning-knap:hover {
+      color: var(--primær-hover);
+    }
+
+    #bemærkning-felt {
+      display: none;
+      margin-top: 6px;
+      height: 40px;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 
 <body>
-
-  <!-- 🎬 YouTube-baggrundsvideo -->
+  <!-- 🎥 Video -->
   <div class="video-baggrund">
     <iframe
       src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
@@ -147,7 +171,7 @@
     ></iframe>
   </div>
 
-  <!-- 🧾 Indhold -->
+  <!-- 🧾 Formular -->
   <div class="indhold">
     <h1>Afslut din booking</h1>
     <p class="undertekst">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
@@ -166,12 +190,15 @@
       <input id="sted" type="text" required>
 
       <label for="telefon">Telefon</label>
-      <input id="telefon" type="tel" placeholder="+45xxxxxxxx" required>
+      <input id="telefon" type="tel" placeholder="Indtast telefonnummer" required>
 
       <div class="afkrydsning">
         <input id="sms-påmindelse" type="checkbox">
-        <label for="sms-påmindelse" style="margin:0; font-weight:500;">Ja tak, send SMS-påmindelse</label>
+        <label for="sms-påmindelse">Ja tak, send SMS-påmindelse</label>
       </div>
+
+      <span class="bemærkning-knap" id="åbn-bemærkning">Eventuelle bemærkninger</span>
+      <textarea id="bemærkning-felt" placeholder="Skriv din kommentar her..."></textarea>
 
       <button type="submit">Bekræft booking</button>
     </form>
@@ -180,6 +207,12 @@
   </div>
 
   <script>
+    // 🔹 Åbn/luk bemærkningsfeltet
+    document.getElementById('åbn-bemærkning').addEventListener('click', () => {
+      const felt = document.getElementById('bemærkning-felt');
+      felt.style.display = (felt.style.display === 'block') ? 'none' : 'block';
+    });
+
     document.getElementById('booking-formular').addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -191,7 +224,8 @@
         dato: document.getElementById('dato').value,
         tid: document.getElementById('tid').value,
         sted: document.getElementById('sted').value,
-        telefon: document.getElementById('telefon').value
+        telefon: document.getElementById('telefon').value,
+        bemærkning: document.getElementById('bemærkning-felt').value
       };
 
       if (!smsPåmindelse) {
@@ -218,5 +252,3 @@
   </script>
 </body>
 </html>
-
-

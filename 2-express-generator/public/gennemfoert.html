@@ -5,19 +5,19 @@
   <title>Tak for din booking – Understory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Hent skrifttypen fra Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@600&display=swap" rel="stylesheet">
 
   <style>
     body {
       margin: 0;
-      font-family: 'Archivo', 'Archivo Black', sans-serif;
+      font-family: 'Archivo', sans-serif;
       background-color: #0b1720;
       color: #f4f4f4;
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      overflow: hidden;
     }
 
     .boks {
@@ -27,6 +27,8 @@
       max-width: 520px;
       box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
       text-align: center;
+      position: relative;
+      z-index: 5;
     }
 
     h1 {
@@ -72,9 +74,47 @@
       font-size: 0.9rem;
       opacity: 0.85;
     }
+
+    /* 🎉 KONFETTI */
+    .confetti {
+      width: 10px;
+      height: 10px;
+      background-color: #7ed957;
+      position: fixed;
+      top: -20px;
+      animation: drop 3s linear infinite;
+      opacity: 0.85;
+      transform: rotate(45deg);
+      z-index: 1;
+    }
+
+    @keyframes drop {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* 🍃 Blade */
+    .leaf {
+      position: fixed;
+      top: -40px;
+      width: 25px;
+      height: 25px;
+      background: #6bbf4e;
+      border-radius: 60% 40% 60% 40%;
+      opacity: 0.9;
+      animation: leafFall 5s linear infinite;
+      z-index: 1;
+    }
+
+    @keyframes leafFall {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(120vh) rotate(340deg); opacity: 0; }
+    }
   </style>
 </head>
+
 <body>
+
   <main class="boks">
     <h1>Tak for din booking 🌿</h1>
 
@@ -92,5 +132,45 @@
 
     <a class="knap" href="/checkout">Tilbage til booking</a>
   </main>
+
+
+  <!-- 🎉 JS der skaber konfetti + blade -->
+  <script>
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createConfetti() {
+      for (let i = 0; i < 30; i++) {
+        const c = document.createElement("div");
+        c.classList.add("confetti");
+        c.style.left = random(0, 100) + "vw";
+        c.style.animationDelay = random(0, 3) + "s";
+        c.style.backgroundColor = ["#7ed957", "#a5f28b", "#c2ff9e"][Math.floor(Math.random() * 3)];
+        document.body.appendChild(c);
+
+        setTimeout(() => c.remove(), 3000);
+      }
+    }
+
+    function createLeaves() {
+      for (let i = 0; i < 10; i++) {
+        const leaf = document.createElement("div");
+        leaf.classList.add("leaf");
+        leaf.style.left = random(0, 100) + "vw";
+        leaf.style.animationDelay = random(0, 4) + "s";
+        leaf.style.background = ["#7ed957", "#6bbf4e", "#8ce36b"][Math.floor(Math.random() * 3)];
+        document.body.appendChild(leaf);
+
+        setTimeout(() => leaf.remove(), 5000);
+      }
+    }
+
+    // Start effekterne
+    createConfetti();
+    createLeaves();
+  </script>
+
 </body>
 </html>
+

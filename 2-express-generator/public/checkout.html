@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="da">
 <head>
@@ -29,7 +30,6 @@
       overflow: hidden;
     }
 
-    /* 🎬 Baggrundsvideo */
     .video-baggrund {
       position: fixed;
       top: 0;
@@ -50,7 +50,6 @@
       pointer-events: none;
     }
 
-    /* 📦 Boksen i midten */
     .indhold {
       width: 90%;
       max-width: 400px;
@@ -81,7 +80,7 @@
       font-weight: 600;
     }
 
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 8px 10px;
       border: 1px solid var(--kant);
@@ -93,35 +92,16 @@
       resize: none;
     }
 
-    input:focus, textarea:focus { border-color: var(--primær); }
+    input:focus, textarea:focus, select:focus { border-color: var(--primær); }
 
-    /* ✅ Checkbox-rækken: venstrejusteret og lidt længere ude */
     .afkrydsning {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 8px;               /* afstand mellem boks og tekst */
-      margin: 12px 0 0 -100px; /* trækker hele rækken 14px mod venstre */
+      gap: 8px;
+      margin: 12px 0 0 -100px;
       color: var(--dæmpet);
       font-weight: 500;
-    }
-
-    .afkrydsning input[type="checkbox"] {
-      margin: 0;
-      transform: scale(1.15);
-      accent-color: var(--primær);
-      transition: transform 0.15s ease;
-    }
-
-    .afkrydsning input[type="checkbox"]:active {
-      transform: scale(1.25);
-    }
-
-    .afkrydsning label {
-      display: inline;
-      margin: 0;
-      white-space: nowrap;    /* holder teksten på én linje */
-      font-weight: 400;
     }
 
     button {
@@ -149,7 +129,6 @@
       text-align: center;
     }
 
-    /* ✍️ Bemærkningsfelt */
     .bemærkning-knap {
       color: var(--primær);
       text-decoration: underline;
@@ -157,10 +136,6 @@
       font-size: 0.9rem;
       display: inline-block;
       margin-top: 10px;
-    }
-
-    .bemærkning-knap:hover {
-      color: var(--primær-hover);
     }
 
     #bemærkning-felt {
@@ -174,7 +149,6 @@
 </head>
 
 <body>
-  <!-- 🎥 Video -->
   <div class="video-baggrund">
     <iframe
       src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
@@ -184,7 +158,6 @@
     ></iframe>
   </div>
 
-  <!-- 🧾 Formular -->
   <div class="indhold">
     <h1>Afslut din booking</h1>
     <p class="undertekst">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
@@ -197,10 +170,31 @@
       <input id="dato" type="date" required>
 
       <label for="tid">Tidspunkt</label>
-      <input id="tid" type="time" required>
+      <select id="tid" required>
+        <option value="">Vælg tidspunkt</option>
+        <option>09:00</option>
+        <option>10:30</option>
+        <option>12:00</option>
+        <option>13:30</option>
+        <option>15:00</option>
+        <option>16:30</option>
+        <option>18:00</option>
+        <option>19:30</option>
+      </select>
 
       <label for="sted">Sted</label>
-      <input id="sted" type="text" required>
+      <!-- ⭐ Dropdown med faste steder -->
+      <select id="sted" required>
+        <option value="">Vælg sted</option>
+        <option>Yoga undervisning</option>
+        <option>Keramikværksted</option>
+        <option>Vinsmagning</option>
+        <option>Flødebollekursus</option>
+        <option>Pilates</option>
+        <option>Cocktailkursus</option>
+        <option>Bolsjekursus</option>
+        <option>Klatring</option>
+      </select>
 
       <label for="telefon">Telefon</label>
       <input id="telefon" type="tel" placeholder="Indtast telefonnummer" required>
@@ -220,7 +214,6 @@
   </div>
 
   <script>
-    // 🔹 Åbn/luk bemærkningsfeltet
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
       const felt = document.getElementById('bemærkning-felt');
       felt.style.display = (felt.style.display === 'block') ? 'none' : 'block';
@@ -242,7 +235,7 @@
       };
 
       if (!smsPåmindelse) {
-        besked.textContent = "Booking gemt - uden SMS-påmindelse.";
+        window.location.href = "/checkout/gennemfoert";
         return;
       }
 
@@ -252,16 +245,21 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
+
         const result = await res.json();
 
-        besked.textContent = result.success
-          ? "SMS-påmindelse sendt"
-          : "Kunne ikke sende SMS";
+        if (result.success) {
+          window.location.href = "/checkout/gennemfoert";
+        } else {
+          besked.textContent = "Kunne ikke sende SMS";
+        }
+
       } catch (err) {
         console.error(err);
         besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
       }
     });
   </script>
+
 </body>
 </html>

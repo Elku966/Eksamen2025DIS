@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="da">
 <head>
@@ -159,7 +158,8 @@
   </div>
 
   <div class="indhold">
-    <h1>Afslut din booking</h1>
+    <!-- tilføjet id til overskriften -->
+    <h1 id="overskrift">Afslut din booking</h1>
     <p class="undertekst">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
 
     <form id="booking-formular">
@@ -214,6 +214,18 @@
   </div>
 
   <script>
+    // Sæt overskrift ud fra ?event= i URL'en
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const eventNavn = params.get('event');
+      if (eventNavn) {
+        const overskrift = document.getElementById('overskrift');
+        if (overskrift) {
+          overskrift.textContent = 'Afslut din booking for ' + eventNavn;
+        }
+      }
+    })();
+
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
       const felt = document.getElementById('bemærkning-felt');
       felt.style.display = (felt.style.display === 'block') ? 'none' : 'block';

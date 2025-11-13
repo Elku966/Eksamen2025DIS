@@ -22,3 +22,18 @@ app.use('/', indexRouter);
 
 module.exports = app;
 
+
+// Force domain (så intet redirecter til localhost)
+app.use((req, res, next) => {
+  const host = req.headers.host;
+
+  // Skift dette til dit rigtige domæne
+  const correctDomain = "naee.dev";   //<--- RET DETTE
+
+  // Hvis host ikke er dit domæne, men fx 'localhost:3000', '127.0.0.1' osv:
+  if (host !== correctDomain) {
+    return res.redirect(`https://${correctDomain}${req.originalUrl}`);
+  }
+
+  next();
+});

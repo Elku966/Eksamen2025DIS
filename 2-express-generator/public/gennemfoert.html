@@ -129,7 +129,7 @@
     <p class="note">
       Har du spørgsmål eller brug for at ændre din tid, kan du altid gå tilbage til bookingsiden.
     </p>
-    
+
     <p id="opsummering" class="note"></p>
 
     <a class="knap" href="/checkout">Tilbage til booking</a>
@@ -186,7 +186,7 @@
   const felt = document.getElementById("opsummering");
 
   if (aktivitet && antal && dato && tid) {
-    felt.textContent = `Du har booket til ${antal} person(er) d. ${dato} kl. ${tid} for ${aktivitet}.`;
+    felt.textContent = `Du har booket til ${antal} person(er) d. ${dato} kl. ${tid} til ${aktivitet}.`;
   } else {
     felt.textContent = "Tak for din booking!";
   }

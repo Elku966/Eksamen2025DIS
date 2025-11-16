@@ -181,15 +181,15 @@
         <option>19:30</option>
       </select>
 
-      <!-- NYT: aktivitet (kun læsbar, udfyldes fra ?event=) -->
+      <!-- Aktivitet (kun læsbar, udfyldes fra ?event=) -->
       <label for="aktivitet">Aktivitet</label>
       <input id="aktivitet" type="text" readonly>
 
-      <!-- NYT: antal personer -->
+      <!-- Antal personer -->
       <label for="antal">Antal personer</label>
       <input id="antal" type="number" min="1" value="1" required>
 
-      <!-- NYT: samlet pris -->
+      <!-- Samlet pris (vises kun her, ikke på gennemført-siden) -->
       <label for="total-pris">Samlet pris</label>
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
@@ -274,11 +274,13 @@
       const aktivitet = document.getElementById('aktivitet').value;
       const antal = document.getElementById('antal').value;
       const totalPris = document.getElementById('total-pris').value;
+      const dato = document.getElementById('dato').value;
+      const tid = document.getElementById('tid').value;
 
       const data = {
         navn: document.getElementById('navn').value,
-        dato: document.getElementById('dato').value,
-        tid: document.getElementById('tid').value,
+        dato: dato,
+        tid: tid,
         aktivitet: aktivitet,
         antal: antal,
         totalPris: totalPris,
@@ -286,11 +288,12 @@
         bemærkning: document.getElementById('bemærkning-felt').value
       };
 
-      // Byg query-string til gennemført-side (så vi kan vise opsummering)
+      // Query-string til gennemført-side (bruges til tekst: antal, dato, tid, aktivitet)
       const query = new URLSearchParams({
         aktivitet: aktivitet,
         antal: antal,
-        total: totalPris
+        dato: dato,
+        tid: tid
       }).toString();
 
       if (!smsPåmindelse) {

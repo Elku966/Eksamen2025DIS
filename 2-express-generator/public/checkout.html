@@ -158,7 +158,6 @@
   </div>
 
   <div class="indhold">
-    <!-- tilføjet id til overskriften -->
     <h1 id="overskrift">Afslut din booking</h1>
     <p class="undertekst">Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.</p>
 
@@ -182,19 +181,9 @@
         <option>19:30</option>
       </select>
 
-      <label for="sted">Sted</label>
-      <!-- ⭐ Dropdown med faste steder -->
-      <select id="sted" required>
-        <option value="">Vælg sted</option>
-        <option>Yoga undervisning</option>
-        <option>Keramikværksted</option>
-        <option>Vinsmagning</option>
-        <option>Flødebollekursus</option>
-        <option>Pilates</option>
-        <option>Cocktailkursus</option>
-        <option>Bolsjekursus</option>
-        <option>Klatring</option>
-      </select>
+      <!-- NYT: aktivitet (kun læsbar, udfyldes fra ?event=) -->
+      <label for="aktivitet">Aktivitet</label>
+      <input id="aktivitet" type="text" readonly>
 
       <!-- NYT: antal personer -->
       <label for="antal">Antal personer</label>
@@ -235,12 +224,12 @@
     };
 
     function opdaterPris() {
-      const sted = document.getElementById('sted').value;
+      const aktivitet = document.getElementById('aktivitet').value;
       const antalInput = document.getElementById('antal');
       const totalFelt = document.getElementById('total-pris');
 
       const antal = parseInt(antalInput.value, 10) || 0;
-      const prisPerPerson = PRISER[sted] || 0;
+      const prisPerPerson = PRISER[aktivitet] || 0;
       const total = prisPerPerson * antal;
 
       if (prisPerPerson && antal > 0) {
@@ -250,32 +239,25 @@
       }
     }
 
-    // Sæt overskrift + sted ud fra ?event= i URL'en
+    // Sæt overskrift + aktivitet ud fra ?event= i URL'en
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');
       const overskrift = document.getElementById('overskrift');
-      const stedSelect = document.getElementById('sted');
+      const aktivitetInput = document.getElementById('aktivitet');
 
       if (eventNavn && overskrift) {
         overskrift.textContent = 'Afslut din booking for ' + eventNavn;
       }
 
-      // Forsøger at matche event-navn med sted-dropdown
-      if (eventNavn && stedSelect) {
-        for (const option of stedSelect.options) {
-          if (option.text === eventNavn) {
-            stedSelect.value = eventNavn;
-            break;
-          }
-        }
+      if (eventNavn && aktivitetInput) {
+        aktivitetInput.value = eventNavn;
       }
 
       // Beregn startpris (standard 1 person)
       opdaterPris();
     })();
 
-    document.getElementById('sted').addEventListener('change', opdaterPris);
     document.getElementById('antal').addEventListener('input', opdaterPris);
 
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
@@ -289,21 +271,30 @@
       const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
       const besked = document.getElementById('besked');
 
+      const aktivitet = document.getElementById('aktivitet').value;
+      const antal = document.getElementById('antal').value;
+      const totalPris = document.getElementById('total-pris').value;
+
       const data = {
         navn: document.getElementById('navn').value,
         dato: document.getElementById('dato').value,
         tid: document.getElementById('tid').value,
-        sted: document.getElementById('sted').value,
+        aktivitet: aktivitet,
+        antal: antal,
+        totalPris: totalPris,
         telefon: document.getElementById('telefon').value,
         bemærkning: document.getElementById('bemærkning-felt').value
-        // Du kan evt. også sende antal og pris med her,
-        // hvis backend skal bruge det:
-        // antal: document.getElementById('antal').value,
-        // totalPris: document.getElementById('total-pris').value
       };
 
+      // Byg query-string til gennemført-side (så vi kan vise opsummering)
+      const query = new URLSearchParams({
+        aktivitet: aktivitet,
+        antal: antal,
+        total: totalPris
+      }).toString();
+
       if (!smsPåmindelse) {
-        window.location.href = "/checkout/gennemfoert";
+        window.location.href = "/checkout/gennemfoert?" + query;
         return;
       }
 
@@ -317,7 +308,7 @@
         const result = await res.json();
 
         if (result.success) {
-          window.location.href = "/checkout/gennemfoert";
+          window.location.href = "/checkout/gennemfoert?" + query;
         } else {
           besked.textContent = "Kunne ikke sende SMS";
         }

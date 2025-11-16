@@ -7,21 +7,21 @@
 
 <style>
 :root{
-  --kort-rgba: rgba(255,255,255,0.82);
-  --tekst:#ffffff;
-  --dæmpet:#d1d5db;
-  --skygge:0 6px 20px rgba(0,0,0,.25);
-  --hjørner:16px;
+--kort-rgba: rgba(255,255,255,0.82);
+--tekst:#ffffff;
+--dæmpet:#d1d5db;
+--skygge:0 6px 20px rgba(0,0,0,.25);
+--hjørner:18px;
 }
 
 *{ box-sizing:border-box; }
 
 body{
-  margin:0;
-  font-family:ui-sans-serif, system-ui;
-  color:var(--tekst);
-  line-height:1.45;
-  overflow-x:hidden;
+margin:0;
+font-family:ui-sans-serif, system-ui;
+color:var(--tekst);
+line-height:1.45;
+overflow-x:hidden;
 }
 
 /* Fjerner understregning fra ALLE links */
@@ -32,99 +32,75 @@ a {
 
 /* BAGGRUND */
 .video-baggrund{
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  z-index:-1;
-  overflow:hidden;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+z-index:-1;
+overflow:hidden;
 }
 
 .video-baggrund iframe{
-  position:absolute;
-  top:50%; left:50%;
-  width:170vw; height:170vh;
-  transform:translate(-50%,-50%);
-  pointer-events:none;
+position:absolute;
+top:50%; left:50%;
+width:170vw; height:170vh;
+transform:translate(-50%,-50%);
+pointer-events:none;
 }
 
-.indhold{ 
-  max-width:1180px; 
-  margin:40px auto; 
-  padding:0 20px; 
-  z-index:2; 
-  position:relative; 
-}
+.indhold{ max-width:1200px; margin:40px auto; padding:0 20px; z-index:2; position:relative; }
 
 /* Overskrift */
-.overskrift-sektion{ 
-  text-align:center; 
-  margin-bottom:40px; 
-}
+.overskrift-sektion{ text-align:center; margin-bottom:50px; }
 .overskrift-sektion h1{
-  font-size:2rem;
-  font-weight:900;
-  color:#fff;
-  text-shadow:0 0 14px rgba(150,255,120,0.6);
+font-size:2.2rem;
+font-weight:900;
+color:#fff;
+text-shadow:0 0 14px rgba(150,255,120,0.6);
 }
 .overskrift-sektion p{
-  font-size:1rem;
-  color:var(--dæmpet);
-  max-width:650px;
-  margin:0 auto;
-  text-shadow:0 0 6px rgba(0,0,0,0.45);
+font-size:1.1rem;
+color:var(--dæmpet);
+max-width:700px;
+margin:0 auto;
+text-shadow:0 0 6px rgba(0,0,0,0.45);
 }
 
-/* KORT GRID */
+/* Kort */
 .oplevelsesgalleri{
-  display:grid;
-  grid-template-columns:repeat(4, 1fr);
-  gap:22px; /* mindre */
+display:grid;
+grid-template-columns:repeat(4, 1fr);
+gap:28px;
 }
 @media (max-width:1100px){ .oplevelsesgalleri{ grid-template-columns:repeat(3,1fr); } }
 @media (max-width:820px){ .oplevelsesgalleri{ grid-template-columns:repeat(2,1fr); } }
 @media (max-width:520px){ .oplevelsesgalleri{ grid-template-columns:1fr; } }
 
-/* KORT */
 .oplevelseskort{
-  background:var(--kort-rgba);
-  border:none;
-  backdrop-filter:blur(4px);
-  border-radius:var(--hjørner);
-  overflow:hidden;
-  box-shadow:0 8px 30px rgba(0,0,0,.22);
-  transition:transform .18s ease, box-shadow .18s ease;
+background:var(--kort-rgba);
+border:none;
+backdrop-filter:blur(4px);
+border-radius:var(--hjørner);
+overflow:hidden;
+box-shadow:0 10px 40px rgba(0,0,0,.25);
+transition:transform .18s ease, box-shadow .18s ease;
 }
 .oplevelseskort:hover{
-  transform:translateY(-4px);
-  box-shadow:0 16px 40px rgba(0,0,0,.32);
+transform:translateY(-5px);
+box-shadow:0 18px 50px rgba(0,0,0,.35);
 }
 
-/* BILLEDET - mindre højde */
 .billede{
-  aspect-ratio:16/10; /* lavere */
-  overflow:hidden;
+aspect-ratio:16/12;
+overflow:hidden;
 }
 .billede img{
-  width:100%; 
-  height:100%;
-  object-fit:cover;
+width:100%; height:100%;
+object-fit:cover;
 }
 
-/* TEKST - mindre */
-.tekstfelt{ 
-  padding:12px 14px 14px; 
-  color:#000; 
-}
-.kort-overskrift{ 
-  margin:0 0 4px; 
-  font-size:1rem; 
-  font-weight:800; 
-}
-.kort-beskrivelse{ 
-  margin:0; 
-  font-size:.85rem; 
-  color:#444; 
-}
+.tekstfelt{ padding:16px 18px 18px; color:#000; }
+.kort-overskrift{ margin:0 0 6px; font-size:1.1rem; font-weight:800; }
+.kort-beskrivelse{ margin:0; font-size:.95rem; color:#555; }
 
 </style>
 </head>
@@ -164,7 +140,7 @@ frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <a href="/checkout?event=Keramikværksted">
 <article class="oplevelseskort">
 <div class="billede">
-<img src="https://images.squarespace-cdn.com/.../Sk%C3%A6rmbillede.png">
+<img src="https://images.squarespace-cdn.com/content/v1/5daaf40e7f5def44229cb428/1680511133923-SRV2PQM5LVXW2KYG8DVM/Sk%C3%A6rmbillede+2023-04-03+kl.+10.38.24.png?format=1000w">
 </div>
 <div class="tekstfelt">
 <h3 class="kort-overskrift">Keramikværksted</h3>
@@ -178,7 +154,7 @@ frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <a href="/checkout?event=Vinsmagning">
 <article class="oplevelseskort">
 <div class="billede">
-<img src="https://findsmagning.dk/wp-content/uploads/2020/02/vin.jpg">
+<img src="https://findsmagning.dk/wp-content/uploads/2020/02/vin-jazz-hos-not-your-usual-winebar-9.jpg">
 </div>
 <div class="tekstfelt">
 <h3 class="kort-overskrift">Vinsmagning</h3>
@@ -192,7 +168,7 @@ frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <a href="/checkout?event=Flødebollekursus">
 <article class="oplevelseskort">
 <div class="billede">
-<img src="https://frellsen.understory.io/_next/image?...">
+<img src="https://frellsen.understory.io/_next/image?url=https%3A%2F%2Fs3.eu-west-1.amazonaws.com%2Fmedia.holdbar.com%2Fexperience%2F93e0b00bfa8712bc265109d65585072e%2Fcover%2FWG07_3ZOjgrC&w=3840&q=75">
 </div>
 <div class="tekstfelt">
 <h3 class="kort-overskrift">Flødebollekursus</h3>
@@ -220,7 +196,7 @@ frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <a href="/checkout?event=Cocktailkursus">
 <article class="oplevelseskort">
 <div class="billede">
-<img src="https://origins.bar/.../cocktail.jpg">
+<img src="https://origins.bar/wp-content/uploads/2023/04/origins-cognac-bar-cocktail-atelier-cocktail-rocks.jpg">
 </div>
 <div class="tekstfelt">
 <h3 class="kort-overskrift">Cocktailkursus</h3>
@@ -234,11 +210,11 @@ frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
 <a href="/checkout?event=Bolsjekursus">
 <article class="oplevelseskort">
 <div class="billede">
-<img src="https://billetto.imgix.net/.../bolsjer.jpg">
+<img src="https://billetto.imgix.net/BRJ5MPBgNKd9QBJ3vnS1mCFP?w=1440&h=810&fit=crop&auto=compress%2Cformat&rect=0%2C0%2C1440%2C600&s=1948fc1fc4938a6c1328368fd6e3a96b" alt="Farverige bolsjer">
 </div>
 <div class="tekstfelt">
 <h3 class="kort-overskrift">Bolsjekursus</h3>
-<p class="kort-beskrivelse">Lav dine egne bolsjer</p>
+<p class="kort-beskrivelse">Skru op for farver, smag og sjov, når du laver dine egne bolsjer</p>
 <p class="kort-beskrivelse"><strong>Pris:</strong> 199 kr. pr. person</p>
 </div>
 </article>

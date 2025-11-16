@@ -129,9 +129,9 @@
     <p class="note">
       Har du spørgsmål eller brug for at ændre din tid, kan du altid gå tilbage til bookingsiden.
     </p>
-
-    <p id="opsummering"></p>
     
+    <p id="opsummering" class="note"></p>
+
     <a class="knap" href="/checkout">Tilbage til booking</a>
   </main>
 
@@ -173,52 +173,25 @@
     createLeaves();
   </script>
 
+
 <script>
-  function random(min, max) {
-    return Math.random() * (max - min) + min;
+  // Hent alle parametre fra URL
+  const params = new URLSearchParams(window.location.search);
+  const aktivitet = params.get("aktivitet");
+  const antal = params.get("antal");
+  const dato = params.get("dato");
+  const tid = params.get("tid");
+
+  // Find opsummerings-element
+  const felt = document.getElementById("opsummering");
+
+  if (aktivitet && antal && dato && tid) {
+    felt.textContent = `Du har booket til ${antal} person(er) d. ${dato} kl. ${tid} for ${aktivitet}.`;
+  } else {
+    felt.textContent = "Tak for din booking!";
   }
-
-  function createConfetti() {
-    for (let i = 0; i < 30; i++) {
-      const c = document.createElement("div");
-      c.classList.add("confetti");
-      c.style.left = random(0, 100) + "vw";
-      c.style.animationDelay = random(0, 3) + "s";
-      c.style.backgroundColor = ["#7ed957", "#a5f28b", "#c2ff9e"][Math.floor(Math.random() * 3)];
-      document.body.appendChild(c);
-      setTimeout(() => c.remove(), 3000);
-    }
-  }
-
-  function createLeaves() {
-    for (let i = 0; i < 10; i++) {
-      const leaf = document.createElement("div");
-      leaf.classList.add("leaf");
-      leaf.style.left = random(0, 100) + "vw";
-      leaf.style.animationDelay = random(0, 4) + "s";
-      leaf.style.background = ["#7ed957", "#6bbf4e", "#8ce36b"][Math.floor(Math.random() * 3)];
-      document.body.appendChild(leaf);
-      setTimeout(() => leaf.remove(), 5000);
-    }
-  }
-
-  // Start effekterne
-  createConfetti();
-  createLeaves();
-
-  // NYT: læs aktivitet, antal og totalpris fra URL'en og vis en lille opsummering
-  (function () {
-    const params = new URLSearchParams(window.location.search);
-    const aktivitet = params.get('aktivitet');
-    const antal = params.get('antal');
-    const total = params.get('total');
-    const opsummeringEl = document.getElementById('opsummering');
-
-    if (aktivitet && antal && total && opsummeringEl) {
-      opsummeringEl.textContent = `Du har booket ${antal} person(er) til ${aktivitet} for i alt ${total}.`;
-    }
-  })();
 </script>
+
 
 
 </body>

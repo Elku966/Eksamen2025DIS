@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    font-family: 'Archivo', sans-serif;
+    background-color: #0b1720;
+    color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+  .boks {
+    background: rgba(10, 25, 35, 0.95);
+    border-radius: 16px;
+    padding: 40px 45px;
+    max-width: 520px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    position: relative;
+    z-index: 5;
+  }
+  
+  h1 {
+    font-family: 'Archivo Black', sans-serif;
+    margin-top: 0;
+    font-size: 2rem;
+    letter-spacing: 0.5px;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin: 0.6rem 0;
+    font-size: 1rem;
+  }
+  
+  .fremhæv {
+    color: #7ed957;
+    font-weight: 700;
+  }
+  
+  .knap {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 12px 28px;
+    border-radius: 50px;
+    border: none;
+    background-color: #7ed957;
+    color: #041015;
+    font-weight: 700;
+    font-family: 'Archivo', sans-serif;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  
+  .knap:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  }
+  
+  .note {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+  
+  /* KONFETTI */
+  .confetti {
+    width: 10px;
+    height: 10px;
+    background-color: #7ed957;
+    position: fixed;
+    top: -20px;
+    animation: drop 3s linear infinite;
+    opacity: 0.85;
+    transform: rotate(45deg);
+    z-index: 1;
+  }
+  
+  @keyframes drop {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
+  }
+  
+  /* Blade */
+  .leaf {
+    position: fixed;
+    top: -40px;
+    width: 25px;
+    height: 25px;
+    background: #6bbf4e;
+    border-radius: 60% 40% 60% 40%;
+    opacity: 0.9;
+    animation: leafFall 5s linear infinite;
+    z-index: 1;
+  }
+  
+  @keyframes leafFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(120vh) rotate(340deg); opacity: 0; }
+  }
+  

@@ -196,6 +196,14 @@
         <option>Klatring</option>
       </select>
 
+      <!-- NYT: antal personer -->
+      <label for="antal">Antal personer</label>
+      <input id="antal" type="number" min="1" value="1" required>
+
+      <!-- NYT: samlet pris -->
+      <label for="total-pris">Samlet pris</label>
+      <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
+
       <label for="telefon">Telefon</label>
       <input id="telefon" type="tel" placeholder="Indtast telefonnummer" required>
 
@@ -214,17 +222,61 @@
   </div>
 
   <script>
-    // Sæt overskrift ud fra ?event= i URL'en
+    // Pris pr. person for hver aktivitet
+    const PRISER = {
+      "Yoga undervisning": 199,
+      "Keramikværksted": 249,
+      "Vinsmagning": 449,
+      "Flødebollekursus": 229,
+      "Pilates": 149,
+      "Cocktailkursus": 399,
+      "Bolsjekursus": 199,
+      "Klatring": 229
+    };
+
+    function opdaterPris() {
+      const sted = document.getElementById('sted').value;
+      const antalInput = document.getElementById('antal');
+      const totalFelt = document.getElementById('total-pris');
+
+      const antal = parseInt(antalInput.value, 10) || 0;
+      const prisPerPerson = PRISER[sted] || 0;
+      const total = prisPerPerson * antal;
+
+      if (prisPerPerson && antal > 0) {
+        totalFelt.value = total.toLocaleString('da-DK') + ' kr.';
+      } else {
+        totalFelt.value = '';
+      }
+    }
+
+    // Sæt overskrift + sted ud fra ?event= i URL'en
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');
-      if (eventNavn) {
-        const overskrift = document.getElementById('overskrift');
-        if (overskrift) {
-          overskrift.textContent = 'Afslut din booking for ' + eventNavn;
+      const overskrift = document.getElementById('overskrift');
+      const stedSelect = document.getElementById('sted');
+
+      if (eventNavn && overskrift) {
+        overskrift.textContent = 'Afslut din booking for ' + eventNavn;
+      }
+
+      // Forsøger at matche event-navn med sted-dropdown
+      if (eventNavn && stedSelect) {
+        for (const option of stedSelect.options) {
+          if (option.text === eventNavn) {
+            stedSelect.value = eventNavn;
+            break;
+          }
         }
       }
+
+      // Beregn startpris (standard 1 person)
+      opdaterPris();
     })();
+
+    document.getElementById('sted').addEventListener('change', opdaterPris);
+    document.getElementById('antal').addEventListener('input', opdaterPris);
 
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
       const felt = document.getElementById('bemærkning-felt');
@@ -244,6 +296,10 @@
         sted: document.getElementById('sted').value,
         telefon: document.getElementById('telefon').value,
         bemærkning: document.getElementById('bemærkning-felt').value
+        // Du kan evt. også sende antal og pris med her,
+        // hvis backend skal bruge det:
+        // antal: document.getElementById('antal').value,
+        // totalPris: document.getElementById('total-pris').value
       };
 
       if (!smsPåmindelse) {

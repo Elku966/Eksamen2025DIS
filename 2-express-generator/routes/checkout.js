@@ -1,38 +1,71 @@
 var express = require('express');
 var path = require('path');
 var router = express.Router();
+const db = require('../db'); // 👈 Tilføjet
 
-// /checkout → viser checkout.html
+// GET /checkout → viser bookingformular
 router.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, '../public/checkout.html'));
 });
 
-// POST /checkout/start → gem booking info i session
-router.post('/start', function(req, res) {
-    req.session.booking = {
-        navn: req.body.navn,
-        dato: req.body.dato,
-        tid: req.body.tid,
-        aktivitet: req.body.aktivitet,
-        antal: req.body.antal,
-        totalPris: req.body.totalPris,
-        telefon: req.body.telefon,
-        bemærkning: req.body.bemærkning
-    };
-
-    console.log("Booking gemt i session:", req.session.booking);
-    res.redirect('/checkout/gennemfoert');
-});
-
-// API til at hente session-data (bruges af gennemfoert.html)
-router.get('/api/booking', function(req, res) {
-    res.json(req.session.booking || {});
-});
-
-
-// /checkout/gennemfoert → viser gennemfoert.html
+// GET /checkout/gennemfoert → viser bekræftelsesside
 router.get('/gennemfoert', function (req, res) {
   res.sendFile(path.join(__dirname, '../public/gennemfoert.html'));
+});
+
+// POST /checkout → GEM booking i database
+router.post('/', function (req, res) {
+  const {
+    navn,
+    dato,
+    tid,
+    aktivitet,
+    antal,
+    totalPris,
+    telefon,
+    bemærkning,
+    smsPaamindelse
+  } = req.body;
+
+  if (!navn || !dato || !tid || !aktivitet || !antal || !totalPris || !telefon) {
+    return res.status(400).send('Mangler data.');
+  }
+
+  const personsInt = parseInt(antal, 10) || 1;
+  const numericPrice = parseFloat(String(totalPris).replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+  const wantsSmsInt = smsPaamindelse ? 1 : 0;
+  const eventDatetime = `${dato}T${tid}`;
+
+  const sql = `
+    INSERT INTO bookings (
+      name, phone, activity, persons, total_price,
+      event_date, event_time, event_datetime, wants_sms, notes
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const params = [
+    navn,
+    telefon,
+    aktivitet,
+    personsInt,
+    numericPrice,
+    dato,
+    tid,
+    eventDatetime,
+    wantsSmsInt,
+    bemærkning || null
+  ];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error('DB FEJL:', err);
+      return res.status(500).json({ success: false });
+    }
+
+    console.log('Booking gemt! ID:', this.lastID);
+    return res.json({ success: true, bookingId: this.lastID });
+  });
 });
 
 module.exports = router;

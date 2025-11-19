@@ -1,3 +1,5 @@
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -29,6 +31,18 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.set('trust proxy', 1);
+app.use(session({
+    secret: 'hemmeligkode123',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}));
+//app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/checkout', checkoutRouter);

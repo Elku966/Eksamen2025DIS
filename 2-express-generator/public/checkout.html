@@ -128,62 +128,57 @@
     });
 
     document.getElementById('booking-formular').addEventListener('submit', async function (e) {
-      e.preventDefault();
+  e.preventDefault();
 
-      const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
-      const besked = document.getElementById('besked');
+  const besked = document.getElementById('besked');
+  const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
 
-      const aktivitet = document.getElementById('aktivitet').value;
-      const antal = document.getElementById('antal').value;
-      const totalPris = document.getElementById('total-pris').value;
-      const dato = document.getElementById('dato').value;
-      const tid = document.getElementById('tid').value;
+  const aktivitet = document.getElementById('aktivitet').value;
+  const antal = document.getElementById('antal').value;
+  const totalPris = document.getElementById('total-pris').value;
+  const dato = document.getElementById('dato').value;
+  const tid = document.getElementById('tid').value;
 
-      const data = {
-        navn: document.getElementById('navn').value,
-        dato: dato,
-        tid: tid,
-        aktivitet: aktivitet,
-        antal: antal,
-        totalPris: totalPris,
-        telefon: document.getElementById('telefon').value,
-        bemærkning: document.getElementById('bemærkning-felt').value
-      };
+  const data = {
+    navn: document.getElementById('navn').value,
+    dato,
+    tid,
+    aktivitet,
+    antal,
+    totalPris,
+    telefon: document.getElementById('telefon').value,
+    bemærkning: document.getElementById('bemærkning-felt').value,
+    smsPaamindelse: smsPåmindelse
+  };
 
-      // Query-string til gennemført-side (bruges til tekst: antal, dato, tid, aktivitet)
-      const query = new URLSearchParams({
-        aktivitet: aktivitet,
-        antal: antal,
-        dato: dato,
-        tid: tid
-      }).toString();
+  // Bruges til gennemført-siden
+  const query = new URLSearchParams({
+    aktivitet,
+    antal,
+    dato,
+    tid
+  }).toString();
 
-      if (!smsPåmindelse) {
-        window.location.href = "/checkout/gennemfoert?" + query;
-        return;
-      }
-
-      try {
-        const res = await fetch('/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-
-        const result = await res.json();
-
-        if (result.success) {
-          window.location.href = "/checkout/gennemfoert?" + query;
-        } else {
-          besked.textContent = "Kunne ikke sende SMS";
-        }
-
-      } catch (err) {
-        console.error(err);
-        besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
-      }
+  try {
+    const res = await fetch('/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
+
+    const result = await res.json();
+
+    if (result.success) {
+      window.location.href = "/checkout/gennemfoert?" + query;
+    } else {
+      besked.textContent = "Der skete en fejl ved din booking.";
+    }
+  } catch (err) {
+    console.error(err);
+    besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
+  }
+});
+
   </script>
 
 </body>

@@ -21,4 +21,8 @@ app.use('/checkout', checkoutRouter);
 app.use('/gennemfoert', gennemfoertRouter);
 app.use('/', indexRouter);
 
+app.get("/health", (req, res) => {
+    res.status(200).send("OK");
+  });  
+
 module.exports = app;

@@ -167,15 +167,15 @@
     });
 
     const result = await res.json();
-
-    if (result.success) {
-      window.location.href = "/checkout/gennemfoert?" + query;
+        
+    if (result) {
+      window.location.href = "/checkout/gennemfoert?aktivitet=" + result.aktivitet + "&antal=" + result.antal + "&dato=" + result.dato + "&tid=" + result.tid;
     } else {
       besked.textContent = "Der skete en fejl ved din booking.";
     }
   } catch (err) {
     console.error(err);
-    besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
+    besked.textContent = "Netværksfejl - kunne ikke kontakte serveren."; 
   }
 });
 

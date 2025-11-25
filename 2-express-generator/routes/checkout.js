@@ -18,7 +18,8 @@ router.post('/', (req, res) => {
   const eventName = eventFromQuery || eventFromBody || 'Din aktivitet';
 
   // Redirect videre til gennemført-siden
-  res.redirect(`/gennemfoert?event=${encodeURIComponent(eventName)}`);
+  // res.redirect(`/gennemfoert?event=${encodeURIComponent(eventName)}`);
+  res.status(200).json(req.body)
 });
 
 router.get('/gennemfoert', (req, res) => {

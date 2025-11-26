@@ -53,49 +53,40 @@
   </div>
 
   <!-- JavaScript til betaling -->
-    <script>
-  document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
-    e.preventDefault();
+  <script>
+    document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-    const besked = document.getElementById('besked');
+      const besked = document.getElementById('besked');
 
-    const data = {
-      kortnavn: document.getElementById('kortnavn').value,
-      kortnummer: document.getElementById('kortnummer').value,
-      udløb: document.getElementById('udløb').value,
-      cvc: document.getElementById('cvc').value
-    };
+      const data = {
+        kortnavn: document.getElementById('kortnavn').value,
+        kortnummer: document.getElementById('kortnummer').value,
+        udløb: document.getElementById('udløb').value,
+        cvc: document.getElementById('cvc').value
+      };
 
-    try {
-      const res = await fetch('/checkout/betal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      try {
+        const res = await fetch('/checkout/betal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
 
-      if (!res.ok) {
-        console.error('Serverfejl:', res.status);
-        besked.textContent = "Serverfejl: " + res.status;
-        return;
+        const result = await res.json();
+
+        if (result.success) {
+  // Behold booking-info i URL'en (aktivitet, antal, dato, tid)
+  window.location.href = "/checkout/gennemfoert" + window.location.search;
+} else {
+  besked.textContent = "Betaling blev ikke godkendt.";
+}
+
+      } catch (err) {
+        console.error(err);
+        besked.textContent = "Betaling kunne ikke gennemføres (netværksfejl).";
       }
-
-      const result = await res.json();
-
-      console.log("Svar fra /checkout/betal:", result);
-
-      if (result && result.success) {
-        // Behold booking-info i URL'en (aktivitet, antal, dato, tid)
-        window.location.href = "/checkout/gennemfoert" + window.location.search;
-      } else {
-        besked.textContent = "Betaling blev ikke godkendt.";
-      }
-
-    } catch (err) {
-      console.error(err);
-      besked.textContent = "Betaling kunne ikke gennemføres (netværksfejl).";
-    }
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>

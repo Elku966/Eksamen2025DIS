@@ -10,7 +10,7 @@ const session = require('express-session');
 // Routers
 var indexRouter = require('./routes/index');
 var checkoutRouter = require('./routes/checkout');
-
+var gennemfoertRouter = require('./routes/gennemfoert');
 
 
 var app = express();

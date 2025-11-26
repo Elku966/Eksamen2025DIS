@@ -51,7 +51,7 @@
       <label for="antal">Antal personer</label>
       <input id="antal" type="number" min="1" value="1" required>
 
-      <!-- Samlet pris -->
+      <!-- Samlet pris (vises kun her, ikke på gennemført-siden) -->
       <label for="total-pris">Samlet pris</label>
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
@@ -87,92 +87,109 @@
 
     function opdaterPris() {
       const aktivitet = document.getElementById('aktivitet').value;
-      const antal = parseInt(document.getElementById('antal').value, 10) || 0;
+      const antalInput = document.getElementById('antal');
       const totalFelt = document.getElementById('total-pris');
 
-      const pris = PRISER[aktivitet] || 0;
-      const total = pris * antal;
+      const antal = parseInt(antalInput.value, 10) || 0;
+      const prisPerPerson = PRISER[aktivitet] || 0;
+      const total = prisPerPerson * antal;
 
-      if (pris && antal > 0) {
-        totalFelt.value = total + " kr.";
+      if (prisPerPerson && antal > 0) {
+        totalFelt.value = total.toLocaleString('da-DK') + ' kr.';
       } else {
-        totalFelt.value = "";
+        totalFelt.value = '';
       }
     }
 
-    // Udfyld aktivitet fra URL (?event=)
+    // Sæt overskrift + aktivitet ud fra ?event= i URL'en
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');
+      const overskrift = document.getElementById('overskrift');
+      const aktivitetInput = document.getElementById('aktivitet');
 
-      if (eventNavn) {
-        document.getElementById('overskrift').textContent = 'Afslut din booking for ' + eventNavn;
-        document.getElementById('aktivitet').value = eventNavn;
+      if (eventNavn && overskrift) {
+        overskrift.textContent = 'Afslut din booking for ' + eventNavn;
       }
 
+      if (eventNavn && aktivitetInput) {
+        aktivitetInput.value = eventNavn;
+      }
+
+      // Beregn startpris (standard 1 person)
       opdaterPris();
     })();
 
     document.getElementById('antal').addEventListener('input', opdaterPris);
 
-    // Toggle bemærkninger
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
       const felt = document.getElementById('bemærkning-felt');
       felt.style.display = (felt.style.display === 'block') ? 'none' : 'block';
     });
 
-    // SUBMIT BOOKING
     document.getElementById('booking-formular').addEventListener('submit', async function (e) {
-      e.preventDefault();
+  e.preventDefault();
 
-      const besked = document.getElementById('besked');
-      const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
+  const besked = document.getElementById('besked');
+  const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
 
-      // FJERN " kr." OG SEND ET TAL TIL BACKEND
-      const totalPris = parseInt(
-        document.getElementById('total-pris').value.replace(" kr.", "")
-      );
+  const aktivitet = document.getElementById('aktivitet').value;
+  const antal = document.getElementById('antal').value;
+  const totalPris = document.getElementById('total-pris').value;
+  const dato = document.getElementById('dato').value;
+  const tid = document.getElementById('tid').value;
 
-      const data = {
-        navn: document.getElementById('navn').value,
-        dato: document.getElementById('dato').value,
-        tid: document.getElementById('tid').value,
-        aktivitet: document.getElementById('aktivitet').value,
-        antal: document.getElementById('antal').value,
-        totalPris,
-        telefon: document.getElementById('telefon').value,
-        bemærkning: document.getElementById('bemærkning-felt').value,
-        smsPaamindelse: smsPåmindelse
-      };
+  const data = {
+    navn: document.getElementById('navn').value,
+    dato,
+    tid,
+    aktivitet,
+    antal,
+    totalPris,
+    telefon: document.getElementById('telefon').value,
+    bemærkning: document.getElementById('bemærkning-felt').value,
+    smsPaamindelse: smsPåmindelse
+  };
 
-      try {
-        const res = await fetch('/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+  // Bruges til gennemført-siden
+  const query = new URLSearchParams({
+    aktivitet,
+    antal,
+    dato,
+    tid
+  }).toString();
 
-        const result = await res.json();
-
-        // ⭐ KUN redirect hvis success = true
-        if (result.success) {
-          const params = new URLSearchParams({
-            aktivitet: result.aktivitet,
-            antal: result.antal,
-            dato: result.dato,
-            tid: result.tid,
-          });
-
-          window.location.href = "/checkout/betaling?" + params.toString();
-        } else {
-          besked.textContent = "Der skete en fejl ved din booking.";
-        }
-
-      } catch (err) {
-        console.error(err);
-        besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
-      }
+  try {
+    const res = await fetch('/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     });
+
+    const result = await res.json();
+        
+    if (result) {
+  // Send brugeren videre til betalingsside og tag info med i URL'en
+  const params = new URLSearchParams({
+    aktivitet: result.aktivitet,
+    antal: result.antal,
+    dato: result.dato,
+    tid: result.tid,
+  });
+
+  window.location.href = "/checkout/betaling?" + params.toString();
+
+} else {
+  besked.textContent = "Der skete en fejl ved din booking.";
+}
+
+
+
+  } catch (err) {
+    console.error(err);
+    besked.textContent = "Netværksfejl - kunne ikke kontakte serveren."; 
+  }
+});
 
   </script>
 

@@ -168,19 +168,19 @@
 
     const result = await res.json();
         
-    if (result && result.success) {
+    if (result) {
+  // Send brugeren videre til betalingsside og tag info med i URL'en
+  const params = new URLSearchParams({
+    aktivitet: result.aktivitet,
+    antal: result.antal,
+    dato: result.dato,
+    tid: result.tid,
+  });
 
-const params = new URLSearchParams({
-  aktivitet: result.aktivitet,
-  antal: result.antal,
-  dato: result.dato,
-  tid: result.tid
-});
-
-window.location.href = "/checkout/betaling?" + params.toString();
+  window.location.href = "/betaling.html?" + params.toString();
 
 } else {
-besked.textContent = "Der skete en fejl ved din booking.";
+  besked.textContent = "Der skete en fejl ved din booking.";
 }
 
 

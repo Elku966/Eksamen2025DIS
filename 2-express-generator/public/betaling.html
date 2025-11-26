@@ -75,17 +75,11 @@
 
         const result = await res.json();
 
-        if (result && result.success) {
-  const params = new URLSearchParams({
-    aktivitet: result.aktivitet,
-    antal: result.antal,
-    dato: result.dato,
-    tid: result.tid
-  });
-
-  window.location.href = "/checkout/gennemfoert?" + params.toString();
+        if (result.success) {
+  // Behold booking-info i URL'en (aktivitet, antal, dato, tid)
+  window.location.href = "/checkout/gennemfoert" + window.location.search;
 } else {
-  besked.textContent = "Betaling fejlede.";
+  besked.textContent = "Betaling blev ikke godkendt.";
 }
 
       } catch (err) {

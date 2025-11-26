@@ -169,10 +169,19 @@
     const result = await res.json();
         
     if (result) {
-      window.location.href = "/checkout/gennemfoert?aktivitet=" + result.aktivitet + "&antal=" + result.antal + "&dato=" + result.dato + "&tid=" + result.tid;
-    } else {
-      besked.textContent = "Der skete en fejl ved din booking.";
-    }
+  // Send brugeren videre til betalingsside og tag info med i URL'en
+  const params = new URLSearchParams({
+    aktivitet: result.aktivitet,
+    antal: result.antal,
+    dato: result.dato,
+    tid: result.tid,
+  });
+
+  window.location.href = "/checkout/betaling?" + params.toString();
+} else {
+  besked.textContent = "Der skete en fejl ved din booking.";
+}
+
   } catch (err) {
     console.error(err);
     besked.textContent = "Netværksfejl - kunne ikke kontakte serveren."; 

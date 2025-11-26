@@ -19,7 +19,7 @@ app.use(session({
   secret: 'understory-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // skal være false lokalt uden HTTPS
+  cookie: { secure: true } // skal være false lokalt uden HTTPS
 }));
 
 // ---------- Middleware ----------

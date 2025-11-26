@@ -169,19 +169,19 @@
     const result = await res.json();
         
     if (result) {
-  // Send brugeren videre til betalingsside og tag info med i URL'en
   const params = new URLSearchParams({
     aktivitet: result.aktivitet,
     antal: result.antal,
     dato: result.dato,
-    tid: result.tid,
+    tid: result.tid
   });
 
-  window.location.href = "/checkout/betaling?" + params.toString();
-
+  // VIGTIGT: direkte til den statiske fil
+  window.location.href = "/betaling.html?" + params.toString();
 } else {
   besked.textContent = "Der skete en fejl ved din booking.";
 }
+
 
   } catch (err) {
     console.error(err);

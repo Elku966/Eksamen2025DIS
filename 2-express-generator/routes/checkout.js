@@ -3,38 +3,28 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 
-const db = require('../utils/db');            // ← DATABASE TILFØJET ✔
-const { sendOrderConfirmation } = require('../utils/sms'); // SMS-FUNKTION
+const db = require('../utils/db');
+const { sendOrderConfirmation } = require('../utils/sms');
 
 //
-// GET /checkout  → booking-siden
+// GET /checkout  → booking side
 //
 router.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/checkout.html'));
 });
 
 //
-// POST /checkout  → modtag booking-data fra formularen
+// POST /checkout  → modtag booking data FRA FORMULAR
 //
 router.post('/', (req, res) => {
   console.log("Booking modtaget:", req.body);
 
-  // GEM BOOKINGDATA I SESSION, så betalingssiden kan hente det
-  req.session.bookingData = {
-    navn: req.body.navn,
-    dato: req.body.dato,
-    tid: req.body.tid,
-    aktivitet: req.body.aktivitet,
-    antal: req.body.antal,
-    totalPris: req.body.totalPris,
-    telefon: req.body.telefon,
-    bemærkning: req.body.bemærkning,
-    smsPaamindelse: req.body.smsPaamindelse
-  };
+  // ⭐ GEM I SESSION ⭐
+  req.session.bookingData = { ...req.body };
 
-  // 🟢 GEM I DATABASE
+  // ⭐ GEM I DATABASE ⭐
   db.run(
-    `INSERT INTO orders 
+    `INSERT INTO orders
       (navn, aktivitet, dato, tid, antal, total_pris, telefon, bemærkning, sms_paamindelse)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
@@ -43,55 +33,60 @@ router.post('/', (req, res) => {
       req.body.dato,
       req.body.tid,
       req.body.antal,
-      parseInt(req.body.totalPris),              // ← vigtigt
+      parseInt(req.body.totalPris),
       req.body.telefon,
       req.body.bemærkning,
       req.body.smsPaamindelse ? 1 : 0
     ],
     (err) => {
       if (err) {
-        console.error("DB fejl:", err.message);
-        return res.json({ success: false });
+        console.error("DB FEJL:", err.message);
+        return res.json({ success: false, error: "db" });
       }
 
-      console.log("Booking gemt i database!");
-      return res.json({ success: true });
+      console.log("Booking gemt!");
+
+      // ⭐ SEND JSON TIL FRONTEND (TIL REDIRECT) ⭐
+      return res.json({
+        success: true,
+        aktivitet: req.body.aktivitet,
+        antal: req.body.antal,
+        dato: req.body.dato,
+        tid: req.body.tid
+      });
     }
   );
 });
 
 //
-// GET /checkout/betaling  → betalingssiden
+// GET /checkout/betaling  → betalingsside
 //
 router.get('/betaling', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/betaling.html'));
 });
 
 //
-// POST /checkout/betal  → når brugeren trykker “Gennemfør betaling”
+// POST /checkout/betal  → når brugeren indsender kortinfo
 //
 router.post('/betal', async (req, res) => {
   console.log("Betaling modtaget:", req.body);
 
-  // Simuleret betaling
+  const booking = req.session.bookingData;
+
+  if (!booking) {
+    console.log("Ingen session-data!");
+    return res.json({ success: false });
+  }
+
+  // Fake betalingssuccess
   const paymentSuccess = true;
 
   if (!paymentSuccess) {
     return res.json({ success: false });
   }
 
-  // HENT BOOKINGDATA FRA SESSION
-  const booking = req.session.bookingData;
-
-  if (!booking) {
-    return res.json({ success: false, message: "Ingen booking fundet." });
-  }
-
-  // SEND SMS ORDREBEKRÆFTELSE
+  // SEND SMS HVIS TELEFONNUMMER FINDES
   if (booking.telefon) {
-    console.log("Sender SMS-ordrebekræftelse med:");
-    console.log(booking);
-
     await sendOrderConfirmation({
       navn: booking.navn,
       dato: booking.dato,
@@ -101,17 +96,20 @@ router.post('/betal', async (req, res) => {
     });
   }
 
-  res.json({ success: true });
+  return res.json({
+    success: true,
+    aktivitet: booking.aktivitet,
+    antal: booking.antal,
+    dato: booking.dato,
+    tid: booking.tid
+  });
 });
 
 //
-// GET /checkout/gennemfoert  → takkesiden
+// GET /checkout/gennemfoert  → takkeside
 //
 router.get('/gennemfoert', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/gennemfoert.html'));
 });
 
 module.exports = router;
-
-
-

@@ -57,13 +57,16 @@
       <label for="total-pris">Samlet pris</label>
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
+      <!-- 📱 Telefon – nu ét enkelt felt -->
       <label for="telefon">Telefon</label>
-
-      <div class="telefon-wrapper">
-        <span class="landekode">+45</span>
-        <input id="telefon" type="tel" maxlength="8" pattern="[0-9]{8}" placeholder="12345678" required>
-      </div>
-      
+      <input
+        id="telefon"
+        type="tel"
+        inputmode="numeric"
+        pattern="[0-9+ ]{8,16}"
+        placeholder="+45 12 34 56 78"
+        required
+      >
 
       <div class="afkrydsning">
         <input id="sms-påmindelse" type="checkbox">

@@ -28,6 +28,8 @@ db.serialize(() => {
             total_pris INTEGER NOT NULL,
             telefon TEXT NOT NULL,
             bemærkning TEXT,
+            payment_confirmed INTEGER NOT NULL DEFAULT 0,   -- 👈 NY
+            reminder_sent INTEGER NOT NULL DEFAULT 0,       -- 👈 allerede til reminder
             sms_paamindelse INTEGER NOT NULL CHECK (sms_paamindelse IN (0,1)),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )

@@ -1,10 +1,10 @@
 // routes/checkout.js
 const express = require('express');
 const path = require('path');
-const bcrypt = require('bcrypt');            // ← til hashing af CVC
+const bcrypt = require('bcrypt'); // til hashing af CVC
 const router = express.Router();
 
-const db = require('../utils/db');           // DB
+const db = require('../utils/db'); // DB
 const { sendOrderConfirmation } = require('../utils/sms'); // SMS-funktion
 
 //
@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
 // POST /checkout  → modtag booking-data fra formularen
 //
 router.post('/', (req, res) => {
-  console.log("Booking modtaget:", req.body);
+  console.log('Booking modtaget:', req.body);
 
   // GEM BOOKINGDATA I SESSION, så betalingssiden kan hente det
   req.session.bookingData = {
@@ -30,14 +30,14 @@ router.post('/', (req, res) => {
     totalPris: req.body.totalPris,
     telefon: req.body.telefon,
     bemærkning: req.body.bemærkning,
-    smsPaamindelse: req.body.smsPaamindelse
+    smsPaamindelse: req.body.smsPaamindelse,
   };
 
   // GEM I DATABASE (orders)
   db.run(
     `INSERT INTO orders 
-      (navn, aktivitet, dato, tid, antal, total_pris, telefon, bemærkning, sms_paamindelse)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (navn, aktivitet, dato, tid, antal, total_pris, telefon, bemærkning, sms_paamindelse, payment_confirmed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       req.body.navn,
       req.body.aktivitet,
@@ -47,15 +47,16 @@ router.post('/', (req, res) => {
       parseInt(req.body.totalPris, 10),
       req.body.telefon,
       req.body.bemærkning,
-      req.body.smsPaamindelse ? 1 : 0
+      req.body.smsPaamindelse ? 1 : 0,
+      0, // 👈 betaling er IKKE godkendt endnu
     ],
-    function (err) {   // VIGTIGT: "function" så vi kan bruge this.lastID
+    function (err) {
       if (err) {
-        console.error("DB fejl (orders):", err.message);
+        console.error('DB fejl (orders):', err.message);
         return res.json({ success: false });
       }
 
-      console.log("Booking gemt i database! Order id:", this.lastID);
+      console.log('Booking gemt i database! Order id:', this.lastID);
 
       // gem order-id i session, så betalingen kan kobles til ordren
       req.session.orderId = this.lastID;
@@ -76,9 +77,9 @@ router.get('/betaling', (req, res) => {
 // POST /checkout/betal  → når brugeren trykker “Gennemfør betaling”
 //
 router.post('/betal', async (req, res) => {
-  console.log("Betaling modtaget:", req.body);
+  console.log('Betaling modtaget:', req.body);
 
-  // Simuleret betaling
+  // Simuleret betaling (her kunne man integrere Stripe osv.)
   const paymentSuccess = true;
   if (!paymentSuccess) {
     return res.json({ success: false });
@@ -89,18 +90,20 @@ router.post('/betal', async (req, res) => {
   const orderId = req.session.orderId;
 
   if (!booking || !orderId) {
-    return res.json({ success: false, message: "Ingen booking fundet." });
+    return res.json({ success: false, message: 'Ingen booking fundet.' });
   }
 
   // 💳 Læs kortdata fra betalingsformen
-  // Sørg for at name="..." i betaling.html matcher disse navne:
-  const cardholderName = req.body.kortnavn;      // fx <input name="kortnavn">
-  const cardNumber     = req.body.kortnummer;    // fx <input name="kortnummer">
-  const cardExpiry     = req.body.udløb;   // fx <input name="udloebsdato">
-  const cvc            = req.body.cvc;           // fx <input name="cvc">
+  const cardholderName = req.body.kortnavn;
+  const cardNumber = req.body.kortnummer;
+  const cardExpiry = req.body.udløb; // "MM/ÅÅ"
+  const cvc = req.body.cvc;
 
   if (!cardholderName || !cardNumber || !cardExpiry || !cvc) {
-    return res.json({ success: false, message: "Udfyld alle betalingsfelter." });
+    return res.json({
+      success: false,
+      message: 'Udfyld alle betalingsfelter.',
+    });
   }
 
   try {
@@ -118,15 +121,36 @@ router.post('/betal', async (req, res) => {
       [orderId, cardholderName, last4, cardExpiry, cvcHash],
       async (err) => {
         if (err) {
-          console.error("Payment DB fejl:", err.message);
+          console.error('Payment DB fejl:', err.message);
           return res.json({ success: false });
         }
 
-        console.log("Payment gemt i database for order", orderId);
+        console.log('Payment gemt i database for order', orderId);
 
-        // SEND SMS ORDREBEKRÆFTELSE – samme som før
+        // 👇 NYT: marker betalingen som gennemført på ordren
+        db.run(
+          `UPDATE orders
+           SET payment_confirmed = 1
+           WHERE id = ?`,
+          [orderId],
+          (updateErr) => {
+            if (updateErr) {
+              console.error(
+                'Fejl ved opdatering af payment_confirmed:',
+                updateErr.message
+              );
+            } else {
+              console.log(
+                'payment_confirmed sat til 1 for order',
+                orderId
+              );
+            }
+          }
+        );
+
+        // SEND SMS ORDREBEKRÆFTELSE – først nu hvor betalingen er ok
         if (booking.telefon) {
-          console.log("Sender SMS-ordrebekræftelse med:");
+          console.log('Sender SMS-ordrebekræftelse med:');
           console.log(booking);
 
           try {
@@ -135,10 +159,10 @@ router.post('/betal', async (req, res) => {
               dato: booking.dato,
               tid: booking.tid,
               aktivitet: booking.aktivitet,
-              telefon: booking.telefon
+              telefon: booking.telefon,
             });
           } catch (smsErr) {
-            console.error("SMS fejl:", smsErr);
+            console.error('SMS fejl:', smsErr);
             // men betalingen er stadig ok
           }
         }
@@ -147,7 +171,7 @@ router.post('/betal', async (req, res) => {
       }
     );
   } catch (err) {
-    console.error("Fejl ved hashing / betaling:", err);
+    console.error('Fejl ved hashing / betaling:', err);
     return res.json({ success: false });
   }
 });

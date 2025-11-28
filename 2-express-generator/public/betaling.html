@@ -54,40 +54,99 @@
   </div>
 
   <!-- JavaScript til betaling -->
-  <script>
-    document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
-      e.preventDefault();
+<script>
+  // Formatér udløbsdato automatisk som MM/ÅÅ
+  const expiryInput = document.getElementById('udløb');
 
-      const besked = document.getElementById('besked');
+  expiryInput.addEventListener('input', (e) => {
+    // Fjern alt andet end tal
+    let value = e.target.value.replace(/\D/g, '');
 
-      const data = {
-        kortnavn: document.getElementById('kortnavn').value,
-        kortnummer: document.getElementById('kortnummer').value,
-        udløb: document.getElementById('udløb').value,
-        cvc: document.getElementById('cvc').value
-      };
+    // Max 4 cifre (MMÅÅ)
+    if (value.length > 4) value = value.slice(0, 4);
 
-      try {
-        const res = await fetch('/checkout/betal', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+    // Byg MM/ÅÅ
+    if (value.length >= 3) {
+      e.target.value = value.slice(0, 2) + '/' + value.slice(2);
+    } else {
+      e.target.value = value;
+    }
+  });
 
-        const result = await res.json();
+  function validateExpiry(value) {
+    // Forventer format MM/ÅÅ
+    const match = /^(\d{2})\/(\d{2})$/.exec(value);
+    if (!match) return { ok: false, message: "Brug formatet MM/ÅÅ, fx 03/27." };
 
-        if (result.success) {
-          // Behold booking-info i URL'en (aktivitet, antal, dato, tid)
-          window.location.href = "/checkout/gennemfoert" + window.location.search;
-        } else {
-          besked.textContent = "Betaling blev ikke godkendt.";
-        }
+    const month = parseInt(match[1], 10);
+    const yearShort = parseInt(match[2], 10); // fx 27
 
-      } catch (err) {
-        console.error(err);
-        besked.textContent = "Betaling kunne ikke gennemføres (netværksfejl).";
+    if (month < 1 || month > 12) {
+      return { ok: false, message: "Måneden skal være mellem 01 og 12." };
+    }
+
+    // År kun mellem 25 og 30 (2025–2030)
+    if (yearShort < 25 || yearShort > 30) {
+      return { ok: false, message: "Årstallet skal være mellem 25 og 30." };
+    }
+
+    // (valgfrit) Tjek udløbet ift. dags dato, hvis I vil:
+    const year = 2000 + yearShort;
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+      return { ok: false, message: "Kortet er udløbet." };
+    }
+
+    return { ok: true };
+  }
+
+  document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const besked = document.getElementById('besked');
+    besked.textContent = "";
+
+    const expiryValue = expiryInput.value.trim();
+    const validation = validateExpiry(expiryValue);
+
+    if (!validation.ok) {
+      besked.textContent = validation.message;
+      return; // stop før vi sender til serveren
+    }
+
+    const data = {
+      kortnavn: document.getElementById('kortnavn').value,
+      kortnummer: document.getElementById('kortnummer').value,
+      udløb: expiryValue,
+      cvc: document.getElementById('cvc').value
+    };
+
+    try {
+      const res = await fetch('/checkout/betal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        window.location.href = "/checkout/gennemfoert" + window.location.search;
+      } else {
+        besked.textContent = result.message || "Betaling blev ikke godkendt.";
       }
-    });
-  </script>
+
+    } catch (err) {
+      console.error(err);
+      besked.textContent = "Betaling kunne ikke gennemføres (netværksfejl).";
+    }
+  });
+</script>
+
+
+ 
 </body>
 </html>

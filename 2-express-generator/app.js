@@ -4,14 +4,19 @@ var logger = require('morgan');
 require('dotenv').config();
 const session = require('express-session');
 
-const redisClient = createClient({ legacyMode: true });
-// ...
+
+
+
 app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'very-secret-session-key',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: false,            // true hvis du KUN vil tillade HTTPS (behind load balancer)
+    maxAge: 1000 * 60 * 60    // 1 time
+  }
 }));
+
 
 // Routers
 var indexRouter = require('./routes/index');

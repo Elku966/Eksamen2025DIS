@@ -1,45 +1,60 @@
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
-require('dotenv').config();
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 const session = require('express-session');
 
-
-
 // Routers
-var indexRouter = require('./routes/index');
-var checkoutRouter = require('./routes/checkout');
-var gennemfoertRouter = require('./routes/gennemfoert');
+const indexRouter = require('./routes/index');
+const checkoutRouter = require('./routes/checkout');
+const usersRouter = require('./routes/users');
 
+const app = express();
 
-var app = express();
+// ----- Middleware -----
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-
+// Session (MemoryStore – ingen Redis)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'hemmelig-session',
+    secret: process.env.SESSION_SECRET || 'very-secret-session-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 1000 * 60 * 60 // 1 time
+      secure: false,            // bag load balancer kunne du sætte den til true
+      maxAge: 1000 * 60 * 60    // 1 time
     }
   })
 );
 
-
-// ---------- Middleware ----------
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Statisk frontend (public-mappen)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---------- Routes ----------
-app.use('/checkout', checkoutRouter);
-app.use('/gennemfoert', gennemfoertRouter);
-app.use('/', indexRouter);
+// ----- Health check til load balancer -----
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
 
-app.get("/health", (req, res) => {
-    res.status(200).send("OK");
-  });  
+// ----- Routes -----
+app.use('/', indexRouter);
+app.use('/checkout', checkoutRouter);
+app.use('/users', usersRouter);
+
+// ----- 404 og fejl-håndtering -----
+app.use(function (req, res, next) {
+  next(createError(404));
+});
+
+app.use(function (err, req, res, next) {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  res.status(err.status || 500);
+  res.send('Error');
+});
 
 module.exports = app;

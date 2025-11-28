@@ -6,18 +6,6 @@ const session = require('express-session');
 
 
 
-
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'very-secret-session-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false,            // true hvis du KUN vil tillade HTTPS (behind load balancer)
-    maxAge: 1000 * 60 * 60    // 1 time
-  }
-}));
-
-
 // Routers
 var indexRouter = require('./routes/index');
 var checkoutRouter = require('./routes/checkout');
@@ -26,7 +14,7 @@ var gennemfoertRouter = require('./routes/gennemfoert');
 
 var app = express();
 
-// SESSION via Redis (deles mellem droplets)
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'hemmelig-session',

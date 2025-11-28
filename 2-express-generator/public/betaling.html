@@ -42,7 +42,6 @@
 
         <div style="flex: 1;">
           <label for="cvc">CVC</label>
-          <!-- 🔒 CVC er nu skjult -->
           <input id="cvc" type="password" maxlength="3" placeholder="•••" required>
         </div>
       </div>
@@ -54,19 +53,35 @@
   </div>
 
   <!-- JavaScript til betaling -->
+<script>
 
- <script>
-  // Formatér udløbsdato automatisk som MM/ÅÅ
   const expiryInput = document.getElementById('udløb');
 
   expiryInput.addEventListener('input', (e) => {
-    // Fjern alt andet end tal
     let value = e.target.value.replace(/\D/g, '');
 
     // Max 4 cifre (MMÅÅ)
     if (value.length > 4) value = value.slice(0, 4);
 
-    // 🔹 NYT: hvis år > 30, sæt det til 30 (uden fejlbesked)
+    // --------------- FORHINDR MÅNED > 12 -----------------
+    if (value.length >= 1) {
+      let month = parseInt(value.slice(0, 2), 10);
+
+      // Auto-ret: 0 → 01
+      if (month === 0) month = 1;
+
+      if (month > 12) {
+        month = 12; // Auto-retter hvis man skriver fx 15
+      }
+
+      // Gendan værdien
+      if (value.length >= 2) {
+        value = month.toString().padStart(2, '0') + value.slice(2);
+      }
+    }
+    // -----------------------------------------------------
+
+    // Begræns år til max 30 (dvs. 2030)
     if (value.length === 4) {
       const year = parseInt(value.slice(2, 4), 10);
       if (year > 30) {
@@ -74,7 +89,7 @@
       }
     }
 
-    // Byg MM/ÅÅ
+    // Formatér som MM/ÅÅ
     if (value.length >= 3) {
       e.target.value = value.slice(0, 2) + '/' + value.slice(2);
     } else {
@@ -82,24 +97,23 @@
     }
   });
 
+
+
   function validateExpiry(value) {
-    // Forventer format MM/ÅÅ
     const match = /^(\d{2})\/(\d{2})$/.exec(value);
     if (!match) return { ok: false, message: "Brug formatet MM/ÅÅ, fx 03/27." };
 
     const month = parseInt(match[1], 10);
-    const yearShort = parseInt(match[2], 10); // fx 27
+    const yearShort = parseInt(match[2], 10);
 
     if (month < 1 || month > 12) {
       return { ok: false, message: "Måneden skal være mellem 01 og 12." };
     }
 
-    // År kun mellem 25 og 30 (2025–2030)
     if (yearShort < 25 || yearShort > 30) {
       return { ok: false, message: "Årstallet skal være mellem 25 og 30." };
     }
 
-    // Tjek udløbet ift. dags dato
     const year = 2000 + yearShort;
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -112,6 +126,8 @@
     return { ok: true };
   }
 
+
+
   document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -123,7 +139,7 @@
 
     if (!validation.ok) {
       besked.textContent = validation.message;
-      return; // stop før vi sender til serveren
+      return;
     }
 
     const data = {
@@ -153,10 +169,8 @@
       besked.textContent = "Betaling kunne ikke gennemføres (netværksfejl).";
     }
   });
+
 </script>
 
-
-
- 
 </body>
 </html>

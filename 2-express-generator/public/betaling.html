@@ -54,7 +54,8 @@
   </div>
 
   <!-- JavaScript til betaling -->
-<script>
+
+ <script>
   // Formatér udløbsdato automatisk som MM/ÅÅ
   const expiryInput = document.getElementById('udløb');
 
@@ -64,6 +65,14 @@
 
     // Max 4 cifre (MMÅÅ)
     if (value.length > 4) value = value.slice(0, 4);
+
+    // 🔹 NYT: hvis år > 30, sæt det til 30 (uden fejlbesked)
+    if (value.length === 4) {
+      const year = parseInt(value.slice(2, 4), 10);
+      if (year > 30) {
+        value = value.slice(0, 2) + '30';
+      }
+    }
 
     // Byg MM/ÅÅ
     if (value.length >= 3) {
@@ -90,7 +99,7 @@
       return { ok: false, message: "Årstallet skal være mellem 25 og 30." };
     }
 
-    // (valgfrit) Tjek udløbet ift. dags dato, hvis I vil:
+    // Tjek udløbet ift. dags dato
     const year = 2000 + yearShort;
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -145,6 +154,8 @@
     }
   });
 </script>
+
+
 
 
  

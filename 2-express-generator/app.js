@@ -5,6 +5,19 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
 
+// Session (MemoryStore – ingen Redis)
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'very-secret-session-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,            // bag load balancer kunne du sætte den til true
+      maxAge: 1000 * 60 * 60    // 1 time
+    }
+  })
+);
+
 // Routers
 const indexRouter = require('./routes/index');
 const checkoutRouter = require('./routes/checkout');
@@ -18,18 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Session (MemoryStore – ingen Redis)
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'very-secret-session-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false,            // bag load balancer kunne du sætte den til true
-      maxAge: 1000 * 60 * 60    // 1 time
-    }
-  })
-);
+
 
 // Statisk frontend (public-mappen)
 app.use(express.static(path.join(__dirname, 'public')));

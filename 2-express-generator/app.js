@@ -38,6 +38,9 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+// 🚀 Start reminder scheduler når første request rammer serveren
+app.use(reminderSchedulerMiddleware);
+
 
 // 👇 Starter scheduler første gang der kommer trafik
 app.use(reminderSchedulerMiddleware);

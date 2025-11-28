@@ -2,18 +2,11 @@
 const db = require('./db');
 const { sendReminder } = require('./sms');
 
-// 🚨 LIGE NU: 30 sekunder før eventet (til test)
-// Når I er færdige med at teste, skift til 24 timer:
-// const DAY_MS = 24 * 60 * 60 * 1000;
-const DAY_MS = 30 * 1000;
-
-// Hvor tit vi tjekker (hver 5. sekund – fint til test)
-const CHECK_INTERVAL_MS = 5000;
-
+const CHECK_INTERVAL_MS = 5000; // tjek hver 5. sekund (fint til test)
 let schedulerStarted = false;
 
+// dato: '2025-11-28', tid: '16:00'
 function parseBookingDateTime(dato, tid) {
-  // Forventer dato i format 'YYYY-MM-DD' og tid 'HH:MM'
   try {
     const iso = `${dato}T${tid}:00`;
     const d = new Date(iso);
@@ -44,11 +37,18 @@ function checkReminders() {
         const eventTime = parseBookingDateTime(row.dato, row.tid);
         if (!eventTime) return;
 
-        const reminderTime = new Date(eventTime.getTime() - DAY_MS);
+        const timeDifference = eventTime - now;
+        const HOURS24 = 24 * 60 * 60 * 1000;
 
-        // Hvis vi er efter reminderTime men før eventTime → send påmindelse
-        if (now >= reminderTime && now < eventTime) {
-          // Prøv at "låse" posten, så kun én server sender SMS
+        // 🧪 TEST-MODE:
+        // Hvis eventet ligger inden for de næste 24 timer,
+        // sender vi påmindelsen MED DET SAMME.
+        if (timeDifference <= HOURS24 && timeDifference > 0) {
+          console.log(
+            `TEST-MODE: event er inden for 24 timer. Sender reminder for order ${row.id} MED DET SAMME`
+          );
+
+          // "Lås" rækken så kun én server sender SMS
           db.run(
             `UPDATE orders
              SET reminder_sent = 1
@@ -56,22 +56,30 @@ function checkReminders() {
             [row.id],
             function (updateErr) {
               if (updateErr) {
-                console.error('Fejl ved opdatering af reminder_sent:', updateErr.message);
+                console.error(
+                  'Fejl ved opdatering af reminder_sent:',
+                  updateErr.message
+                );
                 return;
               }
 
-              // Hvis 0 rækker blev ændret, har en anden proces allerede taget den
+              // Hvis 0 rækker ændret → en anden proces tog den
               if (this.changes === 0) return;
 
-              console.log('👉 Sender påmindelses-SMS for order id', row.id);
-
+              // Send selve SMS'en
               sendReminder({
                 navn: row.navn,
                 aktivitet: row.aktivitet,
                 dato: row.dato,
                 tid: row.tid,
                 telefon: row.telefon
-              });
+              })
+                .then(() => {
+                  console.log('Reminder-SMS sendt for order', row.id);
+                })
+                .catch((smsErr) => {
+                  console.error('Fejl ved afsendelse af reminder-SMS:', smsErr.message);
+                });
             }
           );
         }
@@ -84,14 +92,16 @@ function startScheduler() {
   if (schedulerStarted) return;
   schedulerStarted = true;
 
-  console.log('🔔 Reminder-scheduler startet (tjekker hvert 5. sekund)...');
-  checkReminders();                       // tjek én gang ved opstart
+  console.log(
+    '🔔 Reminder-scheduler startet (TEST-MODE: alle events inden for 24 timer får reminder med det samme)...'
+  );
+  checkReminders();
   setInterval(checkReminders, CHECK_INTERVAL_MS);
 }
 
-// 👉 Express-middleware som du kan bruge med app.use(...)
+// Middleware som du bruger i app.js med app.use(reminderSchedulerMiddleware)
 function reminderSchedulerMiddleware(req, res, next) {
-  startScheduler();  // sørger for kun at starte én gang
+  startScheduler(); // sikrer at den kun starter én gang
   next();
 }
 

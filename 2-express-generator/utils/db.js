@@ -48,5 +48,28 @@ db.serialize(() => {
     console.log('Database klar.');
 });
 
+db.serialize(() => {
+    console.log('Opretter orders-tabel hvis den ikke findes...');
+  
+    db.run(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        navn TEXT NOT NULL,
+        aktivitet TEXT NOT NULL,
+        dato TEXT NOT NULL,
+        tid TEXT NOT NULL,
+        antal INTEGER NOT NULL,
+        total_pris INTEGER NOT NULL,
+        telefon TEXT NOT NULL,
+        bemærkning TEXT,
+        sms_paamindelse INTEGER NOT NULL CHECK (sms_paamindelse IN (0,1)),
+        reminder_sent INTEGER NOT NULL DEFAULT 0,      -- 👈 NY
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  
+    console.log('Database klar.');
+  });
+  
 
 module.exports = db;

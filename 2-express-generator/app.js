@@ -7,7 +7,12 @@ const logger = require('morgan');
 const session = require('express-session');
 const responseTime = require('response-time');
 
+// 👇 NYT: hent middleware til SMS-påmindelses-scheduler
+const { reminderSchedulerMiddleware } = require('./utils/reminderScheduler');
+
 const app = express();
+
+// Mål svartid (valgfrit, men fint til load balancer)
 app.use(responseTime());
 
 // Session (MemoryStore – ingen Redis)
@@ -28,15 +33,14 @@ const indexRouter = require('./routes/index');
 const checkoutRouter = require('./routes/checkout');
 const usersRouter = require('./routes/users');
 
-
-
 // ----- Middleware -----
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-
+// 👇 Starter scheduler første gang der kommer trafik
+app.use(reminderSchedulerMiddleware);
 
 // Statisk frontend (public-mappen)
 app.use(express.static(path.join(__dirname, 'public')));

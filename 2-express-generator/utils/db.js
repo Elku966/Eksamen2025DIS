@@ -32,7 +32,19 @@ db.serialize(() => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
-
+    
+    db.run(`
+        CREATE TABLE IF NOT EXISTS payments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          order_id INTEGER NOT NULL,
+          cardholder_name TEXT NOT NULL,
+          card_last4 TEXT NOT NULL,
+          card_expiry TEXT NOT NULL,
+          cvc_hash TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+        )
+      `);
     console.log('Database klar.');
 });
 

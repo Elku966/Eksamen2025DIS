@@ -5,7 +5,10 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
+const responseTime = require('response-time');
+
 const app = express();
+app.use(responseTime());
 
 // Session (MemoryStore – ingen Redis)
 app.use(

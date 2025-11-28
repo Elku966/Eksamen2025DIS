@@ -29,7 +29,8 @@
       <input id="navn" type="text" required>
 
       <label for="dato">Dato</label>
-      <input id="dato" type="date" required>
+      <!-- Max sat til sidste dag i 2027 -->
+      <input id="dato" type="date" max="2027-12-31" required>
 
       <label for="tid">Tidspunkt</label>
       <select id="tid" required>
@@ -57,7 +58,12 @@
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
       <label for="telefon">Telefon</label>
-      <input id="telefon" type="tel" placeholder="Indtast telefonnummer" required>
+
+      <div class="telefon-wrapper">
+        <span class="landekode">+45</span>
+        <input id="telefon" type="tel" maxlength="8" pattern="[0-9]{8}" placeholder="12345678" required>
+      </div>
+      
 
       <div class="afkrydsning">
         <input id="sms-påmindelse" type="checkbox">

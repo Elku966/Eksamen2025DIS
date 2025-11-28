@@ -1,9 +1,11 @@
 const createError = require('http-errors');
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
+const app = express();
 
 // Session (MemoryStore – ingen Redis)
 app.use(
@@ -23,7 +25,7 @@ const indexRouter = require('./routes/index');
 const checkoutRouter = require('./routes/checkout');
 const usersRouter = require('./routes/users');
 
-const app = express();
+
 
 // ----- Middleware -----
 app.use(logger('dev'));

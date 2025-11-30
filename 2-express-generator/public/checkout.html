@@ -29,7 +29,6 @@
       <input id="navn" type="text" required>
 
       <label for="dato">Dato</label>
-      <!-- Max sat til sidste dag i 2027 -->
       <input id="dato" type="date" max="2027-12-31" required>
 
       <label for="tid">Tidspunkt</label>
@@ -45,19 +44,15 @@
         <option>19:30</option>
       </select>
 
-      <!-- Aktivitet (kun læsbar, udfyldes fra ?event=) -->
       <label for="aktivitet">Aktivitet</label>
       <input id="aktivitet" type="text" readonly>
 
-      <!-- Antal personer -->
       <label for="antal">Antal personer</label>
       <input id="antal" type="number" min="1" value="1" required>
 
-      <!-- Samlet pris (vises kun her, ikke på gennemført-siden) -->
       <label for="total-pris">Samlet pris</label>
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
-      <!-- 📱 Telefon – nu ét enkelt felt -->
       <label for="telefon">Telefon</label>
       <input
         id="telefon"
@@ -83,7 +78,54 @@
   </div>
 
   <script>
-    // Pris pr. person for hver aktivitet
+    //  NYT: Sæt min-dato = i dag (YYYY-MM-DD)
+    (function () {
+      const nu = new Date();
+      const y = nu.getFullYear();
+      const m = String(nu.getMonth() + 1).padStart(2, "0");
+      const d = String(nu.getDate()).padStart(2, "0");
+
+      const minDato = `${y}-${m}-${d}`;
+      document.getElementById("dato").setAttribute("min", minDato);
+    })();
+
+
+    // Skjul tider der er "fortid", hvis brugeren vælger i dag
+    document.getElementById('dato').addEventListener('change', function () {
+      const valgtDato = this.value;
+      const nu = new Date();
+      const tidSelect = document.getElementById('tid');
+      const alleOptioner = tidSelect.querySelectorAll("option");
+
+      // Reset alle tider = vis alt igen
+      alleOptioner.forEach(opt => opt.hidden = false);
+
+      if (!valgtDato) return;
+
+      const iDag = nu.toISOString().split("T")[0];
+
+      // Hvis dato = i dag → fjern tidligere tidspunkter
+      if (valgtDato === iDag) {
+        const nuTimer = nu.getHours();
+        const nuMin = nu.getMinutes();
+
+        alleOptioner.forEach(opt => {
+          if (!opt.value) return;
+          const [h, m] = opt.value.split(":").map(Number);
+
+          // Skjul tidspunkter der er tidligere end nu
+          if (h < nuTimer || (h === nuTimer && m < nuMin)) {
+            opt.hidden = true;
+          }
+        });
+      }
+
+      // Reset valgt tid
+      tidSelect.value = "";
+    });
+
+
+    // Pris pr. person
     const PRISER = {
       "Yoga undervisning": 199,
       "Keramikværksted": 249,
@@ -97,36 +139,21 @@
 
     function opdaterPris() {
       const aktivitet = document.getElementById('aktivitet').value;
-      const antalInput = document.getElementById('antal');
-      const totalFelt = document.getElementById('total-pris');
-
-      const antal = parseInt(antalInput.value, 10) || 0;
-      const prisPerPerson = PRISER[aktivitet] || 0;
-      const total = prisPerPerson * antal;
-
-      if (prisPerPerson && antal > 0) {
-        totalFelt.value = total.toLocaleString('da-DK') + ' kr.';
-      } else {
-        totalFelt.value = '';
-      }
+      const antal = parseInt(document.getElementById('antal').value, 10) || 0;
+      const total = (PRISER[aktivitet] || 0) * antal;
+      document.getElementById('total-pris').value =
+        total > 0 ? total.toLocaleString("da-DK") + " kr." : "";
     }
 
-    // Sæt overskrift + aktivitet ud fra ?event= i URL'en
+    // Aktivitet fra URL
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');
-      const overskrift = document.getElementById('overskrift');
-      const aktivitetInput = document.getElementById('aktivitet');
-
-      if (eventNavn && overskrift) {
-        overskrift.textContent = 'Afslut din booking for ' + eventNavn;
+      if (eventNavn) {
+        document.getElementById('overskrift').textContent =
+          "Afslut din booking for " + eventNavn;
+        document.getElementById('aktivitet').value = eventNavn;
       }
-
-      if (eventNavn && aktivitetInput) {
-        aktivitetInput.value = eventNavn;
-      }
-
-      // Beregn startpris (standard 1 person)
       opdaterPris();
     })();
 
@@ -134,32 +161,25 @@
 
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
       const felt = document.getElementById('bemærkning-felt');
-      felt.style.display = (felt.style.display === 'block') ? 'none' : 'block';
+      felt.style.display = felt.style.display === 'block' ? 'none' : 'block';
     });
 
-    // Håndter submit af booking-formularen
+    // Form submit
     document.getElementById('booking-formular').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const besked = document.getElementById('besked');
-      const smsPåmindelse = document.getElementById('sms-påmindelse').checked;
-
-      const aktivitet = document.getElementById('aktivitet').value;
-      const antal = document.getElementById('antal').value;
-      const totalPris = document.getElementById('total-pris').value;
-      const dato = document.getElementById('dato').value;
-      const tid = document.getElementById('tid').value;
 
       const data = {
         navn: document.getElementById('navn').value,
-        dato,
-        tid,
-        aktivitet,
-        antal,
-        totalPris,
+        dato: document.getElementById('dato').value,
+        tid: document.getElementById('tid').value,
+        aktivitet: document.getElementById('aktivitet').value,
+        antal: document.getElementById('antal').value,
+        totalPris: document.getElementById('total-pris').value,
         telefon: document.getElementById('telefon').value,
         bemærkning: document.getElementById('bemærkning-felt').value,
-        smsPaamindelse: smsPåmindelse
+        smsPaamindelse: document.getElementById('sms-påmindelse').checked
       };
 
       try {
@@ -170,28 +190,20 @@
         });
 
         if (!res.ok) {
-          console.error('Serverfejl:', res.status);
           besked.textContent = "Serverfejl: " + res.status;
           return;
         }
 
-        // Vi kan læse svaret hvis vi vil logge det, men vi bruger ikke felterne til URL'en
-        const result = await res.json();
-        console.log('Svar fra /checkout:', result);
-
-        // Hvis alt gik godt, send brugeren videre til betalingssiden
-        // Brug værdierne direkte fra formularen, så vi aldrig får "undefined"
-        const params = new URLSearchParams({
-          aktivitet,
-          antal,
-          dato,
-          tid
+        const activityParams = new URLSearchParams({
+          aktivitet: data.aktivitet,
+          antal: data.antal,
+          dato: data.dato,
+          tid: data.tid
         });
 
-        window.location.href = "/checkout/betaling?" + params.toString();
+        window.location.href = "/checkout/betaling?" + activityParams.toString();
 
-      } catch (err) {
-        console.error(err);
+      } catch {
         besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
       }
     });

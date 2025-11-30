@@ -18,7 +18,8 @@ router.get('/', (req, res) => {
 // POST /checkout  → modtag booking-data fra formularen
 //
 router.post('/', (req, res) => {
-  console.log('Booking modtaget:', req.body);
+  console.log('--- POST /checkout ---');
+  console.log('Body:', req.body);
 
   // GEM BOOKINGDATA I SESSION, så betalingssiden kan hente det
   req.session.bookingData = {
@@ -32,6 +33,8 @@ router.post('/', (req, res) => {
     bemærkning: req.body.bemærkning,
     smsPaamindelse: req.body.smsPaamindelse,
   };
+
+  console.log('Session efter /checkout (bookingData sat):', req.session);
 
   // GEM I DATABASE (orders)
   db.run(
@@ -61,6 +64,8 @@ router.post('/', (req, res) => {
       // gem order-id i session, så betalingen kan kobles til ordren
       req.session.orderId = this.lastID;
 
+      console.log('Session efter at orderId er sat:', req.session);
+
       return res.json({ success: true });
     }
   );
@@ -77,7 +82,9 @@ router.get('/betaling', (req, res) => {
 // POST /checkout/betal  → når brugeren trykker “Gennemfør betaling”
 //
 router.post('/betal', async (req, res) => {
-  console.log('Betaling modtaget:', req.body);
+  console.log('--- POST /checkout/betal ---');
+  console.log('Body:', req.body);
+  console.log('Session ved start af /checkout/betal:', req.session);
 
   // Simuleret betaling (her kunne man integrere Stripe osv.)
   const paymentSuccess = true;
@@ -89,7 +96,11 @@ router.post('/betal', async (req, res) => {
   const booking = req.session.bookingData;
   const orderId = req.session.orderId;
 
+  console.log('booking fra session:', booking);
+  console.log('orderId fra session:', orderId);
+
   if (!booking || !orderId) {
+    console.warn('Ingen booking eller orderId fundet i sessionen!');
     return res.json({ success: false, message: 'Ingen booking fundet.' });
   }
 
@@ -100,6 +111,7 @@ router.post('/betal', async (req, res) => {
   const cvc = req.body.cvc;
 
   if (!cardholderName || !cardNumber || !cardExpiry || !cvc) {
+    console.warn('Manglende betalingsfelter!');
     return res.json({
       success: false,
       message: 'Udfyld alle betalingsfelter.',

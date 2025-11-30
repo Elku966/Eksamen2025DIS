@@ -7,22 +7,6 @@ const router = express.Router();
 const db = require('../utils/db'); // DB
 const { sendOrderConfirmation, sendReminder } = require('../utils/sms');
 
-// Adresse pr. aktivitet
-const ACTIVITY_LOCATIONS = {
-  "Yoga undervisning": "Thorvaldsensvej 3, 1871 Frederiksberg C",
-  "Keramikværksted": "Borups Allé 29, 2200 København N",
-  "Vinsmagning": "Gammel Mønt 4, 1117 København K",
-  "Flødebollekursus": "Ordrupvej 42, 2920 Charlottenlund",
-  "Pilates": "Guldbergsgade 29A, 2. 2200 København N",
-  "Cocktailkursus": "Kløvermarksvej 70 D, 2300 Copenhagen, Denmark",
-  "Bolsjekursus": "Værkstedsgården 13, 2620 Albertslund",
-  "Klatring": "Vildnisset i Søndermarken, 2000 Frederiksberg",
-};
-
-function getLocationForActivity(aktivitet) {
-  return ACTIVITY_LOCATIONS[aktivitet] || "";
-}
-
 //
 // GET /checkout  → booking-siden
 //
@@ -43,21 +27,21 @@ router.post('/', (req, res) => {
     dato: req.body.dato,
     tid: req.body.tid,
     aktivitet: req.body.aktivitet,
+    lokation: req.body.lokation,       // 👈 NY
     antal: req.body.antal,
     totalPris: req.body.totalPris,
     telefon: req.body.telefon,
     bemærkning: req.body.bemærkning,
     smsPaamindelse: req.body.smsPaamindelse,
-    lokation: getLocationForActivity(req.body.aktivitet),   // 👈 NY
   };
-  
+
   console.log('Session efter /checkout (bookingData sat):', req.session);
 
   // GEM I DATABASE (orders)
   db.run(
     `INSERT INTO orders 
-      (navn, aktivitet, dato, tid, antal, total_pris, telefon, bemærkning, sms_paamindelse, payment_confirmed)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (navn, aktivitet, dato, tid, antal, total_pris, telefon, bemærkning, sms_paamindelse, payment_confirmed, lokation)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       req.body.navn,
       req.body.aktivitet,
@@ -68,7 +52,8 @@ router.post('/', (req, res) => {
       req.body.telefon,
       req.body.bemærkning,
       req.body.smsPaamindelse ? 1 : 0,
-      0 // 👈 betaling er IKKE godkendt endnu
+      0,                        // betaling er IKKE godkendt endnu
+      req.body.lokation || null // 👈 NY: gem adresse
     ],
     function (err) {
       if (err) {
@@ -123,9 +108,9 @@ router.post('/betal', async (req, res) => {
 
   // 💳 Læs kortdata fra betalingsformen
   const cardholderName = req.body.kortnavn;
-  const cardNumber = req.body.kortnummer;
-  const cardExpiry = req.body.udløb; // "MM/ÅÅ"
-  const cvc = req.body.cvc;
+  const cardNumber     = req.body.kortnummer;
+  const cardExpiry     = req.body.udløb; // "MM/ÅÅ"
+  const cvc            = req.body.cvc;
 
   if (!cardholderName || !cardNumber || !cardExpiry || !cvc) {
     console.warn('Manglende betalingsfelter!');
@@ -180,8 +165,8 @@ router.post('/betal', async (req, res) => {
               dato: booking.dato,
               tid: booking.tid,
               aktivitet: booking.aktivitet,
+              lokation: booking.lokation,  // 👈 NY
               telefon: booking.telefon,
-              lokation: booking.lokation,   // 👈 NY
             });
           } catch (smsErr) {
             console.error('SMS fejl (ordrebekræftelse):', smsErr);
@@ -204,9 +189,8 @@ router.post('/betal', async (req, res) => {
                 dato: booking.dato,
                 tid: booking.tid,
                 aktivitet: booking.aktivitet,
+                lokation: booking.lokation,  // 👈 NY
                 telefon: booking.telefon,
-                lokation: booking.lokation,   // 👈 NY
-
               });
 
               // valgfrit: opdatér reminder_sent = 1 i orders

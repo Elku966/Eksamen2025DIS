@@ -39,7 +39,6 @@ async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon }) {
     }
 
     const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-
     const toNumber = normalizeNumber(telefon);
 
     const smsText =

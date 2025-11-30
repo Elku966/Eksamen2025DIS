@@ -7,8 +7,6 @@ const logger = require('morgan');
 const session = require('express-session');
 const responseTime = require('response-time');
 
-// 👇 NYT: hent middleware til SMS-påmindelses-scheduler
-const { reminderSchedulerMiddleware } = require('./utils/reminderScheduler');
 
 const app = express();
 
@@ -38,12 +36,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// 🚀 Start reminder scheduler når første request rammer serveren
-app.use(reminderSchedulerMiddleware);
 
-
-// 👇 Starter scheduler første gang der kommer trafik
-app.use(reminderSchedulerMiddleware);
 
 // Statisk frontend (public-mappen)
 app.use(express.static(path.join(__dirname, 'public')));

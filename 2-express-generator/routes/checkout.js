@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt'); // til hashing af CVC
 const router = express.Router();
 
 const db = require('../utils/db'); // DB
-const { sendOrderConfirmation } = require('../utils/sms'); // SMS-funktion
+const { sendOrderConfirmation, sendReminder } = require('../utils/sms'); // SMS-funktioner
 
 //
 // GET /checkout  → booking-siden
@@ -48,7 +48,7 @@ router.post('/', (req, res) => {
       req.body.telefon,
       req.body.bemærkning,
       req.body.smsPaamindelse ? 1 : 0,
-      0, // 👈 betaling er IKKE godkendt endnu
+      0 // 👈 betaling er IKKE godkendt endnu
     ],
     function (err) {
       if (err) {
@@ -127,7 +127,7 @@ router.post('/betal', async (req, res) => {
 
         console.log('Payment gemt i database for order', orderId);
 
-        // 👇 NYT: marker betalingen som gennemført på ordren
+        // Marker betalingen som gennemført
         db.run(
           `UPDATE orders
            SET payment_confirmed = 1
@@ -139,20 +139,12 @@ router.post('/betal', async (req, res) => {
                 'Fejl ved opdatering af payment_confirmed:',
                 updateErr.message
               );
-            } else {
-              console.log(
-                'payment_confirmed sat til 1 for order',
-                orderId
-              );
             }
           }
         );
 
-        // SEND SMS ORDREBEKRÆFTELSE – først nu hvor betalingen er ok
+        // 📩 SEND ORDREBEKRÆFTELSE (altid efter godkendt betaling)
         if (booking.telefon) {
-          console.log('Sender SMS-ordrebekræftelse med:');
-          console.log(booking);
-
           try {
             await sendOrderConfirmation({
               navn: booking.navn,
@@ -162,9 +154,42 @@ router.post('/betal', async (req, res) => {
               telefon: booking.telefon,
             });
           } catch (smsErr) {
-            console.error('SMS fejl:', smsErr);
-            // men betalingen er stadig ok
+            console.error('SMS fejl (ordrebekræftelse):', smsErr);
           }
+        }
+
+        // 🕒 24-timers logik – send reminder KUN hvis eventet er indenfor 24 timer
+        try {
+          if (booking.smsPaamindelse) {
+            const eventTime = new Date(`${booking.dato}T${booking.tid}:00`);
+            const now = new Date();
+            const diffMs = eventTime - now;
+            const ONE_DAY = 24 * 60 * 60 * 1000;
+
+            if (diffMs > 0 && diffMs <= ONE_DAY) {
+              console.log('Event indenfor 24 timer → sender reminder nu');
+
+              await sendReminder({
+                navn: booking.navn,
+                dato: booking.dato,
+                tid: booking.tid,
+                aktivitet: booking.aktivitet,
+                telefon: booking.telefon,
+              });
+
+              // valgfrit: opdatér reminder_sent = 1 i orders
+              db.run(
+                `UPDATE orders SET reminder_sent = 1 WHERE id = ?`,
+                [orderId]
+              );
+            } else {
+              console.log(
+                'Event er ikke indenfor 24 timer → ingen reminder nu'
+              );
+            }
+          }
+        } catch (remErr) {
+          console.error('Fejl i 24-timers reminder-logik:', remErr);
         }
 
         return res.json({ success: true });

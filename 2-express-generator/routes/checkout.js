@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt'); // til hashing af CVC
 const router = express.Router();
 
 const db = require('../utils/db'); // DB
-const { sendOrderConfirmation, sendReminder } = require('../utils/sms'); // SMS-funktioner
+const { sendOrderConfirmation, sendReminder } = require('../utils/sms');
 
 //
 // GET /checkout  → booking-siden

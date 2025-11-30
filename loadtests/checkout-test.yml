@@ -1,0 +1,24 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 8
+
+scenarios:
+  - name: "Checkout GET + POST"
+    flow:
+      - get:
+          url: "/checkout"
+
+      - post:
+          url: "/checkout"
+          json:
+            navn: "Test Person"
+            dato: "2025-01-01"
+            tid: "12:00"
+            aktivitet: "Bowling"
+            antal: 2
+            totalPris: 300
+            telefon: "12345678"
+            bemærkning: "Ingen"
+            smsPaamindelse: 1

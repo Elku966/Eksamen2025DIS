@@ -15,5 +15,8 @@
     "morgan": "~1.9.1",
     "response-time": "^2.3.4",
     "twilio": "^5.10.4"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.21"
   }
 }

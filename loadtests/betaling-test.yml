@@ -1,0 +1,16 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 20
+      arrivalRate: 5
+
+scenarios:
+  - name: "Betaling POST"
+    flow:
+      - post:
+          url: "/checkout/betal"
+          json:
+            kortnavn: "Tester Testesen"
+            kortnummer: "4242424242424242"
+            udløb: "12/25"
+            cvc: "123"

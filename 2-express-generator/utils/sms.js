@@ -71,8 +71,8 @@ async function sendReminder({ navn, aktivitet, dato, tid, telefon }) {
     const toNumber = normalizeNumber(telefon);
 
     const smsText =
-      `Hej ${navn}! Dette er en venlig påmindelse om din oplevelse: ${aktivitet} ` +
-      `i morgen d. ${dato} kl. ${tid} hos Understory. Vi glæder os til at se dig 🌿`;
+      `Hej ${navn}! Dette er en påmindelse om din booking: ${aktivitet} ` +
+      `i morgen d. ${dato} kl. ${tid} hos Understory. Vi ser frem til at byde dig velkommen og give dig en skøn oplevelse!`;
 
     const msg = await client.messages.create({
       to: toNumber,

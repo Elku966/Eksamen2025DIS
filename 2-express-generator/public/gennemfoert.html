@@ -7,11 +7,9 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/stylesheets/gennemfoert.css">
-
 </head>
 
 <body>
-
   <main class="boks">
     <h1>Tak for din booking 🌿</h1>
 
@@ -27,13 +25,14 @@
       Har du spørgsmål eller brug for at ændre din tid, kan du altid gå tilbage til bookingsiden.
     </p>
 
+    <!-- Her skriver vi opsummering + adresse ind via JS -->
     <p id="opsummering" class="note"></p>
+    <p id="gennemfoert-lokation" class="note"></p>
 
     <a class="knap" href="/">Tilbage til forside</a>
   </main>
 
-
-  <!-- 🎉 JS der skaber konfetti + blade -->
+  <!-- 🎉 Konfetti + blade-effekt -->
   <script>
     function random(min, max) {
       return Math.random() * (max - min) + min;
@@ -65,32 +64,46 @@
       }
     }
 
-    // Start effekterne
     createConfetti();
     createLeaves();
   </script>
 
+  <!-- 🔎 Opsummering + lokation -->
+  <script>
+    const LOKATIONER = {
+      "Yoga undervisning": "Thorvaldsensvej 3, 1871 Frederiksberg C",
+      "Keramikværksted": "Borups Allé 29, 2200 København N",
+      "Vinsmagning": "Gammel Mønt 4, 1117 København K",
+      "Flødebollekursus": "Ordrupvej 42, 2920 Charlottenlund",
+      "Pilates": "Guldbergsgade 29A, 2. 2200 København N",
+      "Cocktailkursus": "Kløvermarksvej 70 D, 2300 Copenhagen, Denmark",
+      "Bolsjekursus": "Værkstedsgården 13, 2620 Albertslund",
+      "Klatring": "Vildnisset i Søndermarken, 2000 Frederiksberg",
+    };
 
-<script>
-  // Hent alle parametre fra URL
-  const params = new URLSearchParams(window.location.search);
-  const aktivitet = params.get("aktivitet");
-  const antal = params.get("antal");
-  const dato = params.get("dato");
-  const tid = params.get("tid");
+    // Læs parametre fra URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const aktivitet = urlParams.get("aktivitet");
+    const antal = urlParams.get("antal");
+    const dato = urlParams.get("dato");
+    const tid = urlParams.get("tid");
 
-  // Find opsummerings-element
-  const felt = document.getElementById("opsummering");
+    const opsummeringFelt = document.getElementById("opsummering");
+    const lokationFelt = document.getElementById("gennemfoert-lokation");
 
-  if (aktivitet && antal && dato && tid) {
-    felt.textContent = `Du har booket til ${antal} person(er) d. ${dato} kl. ${tid} til ${aktivitet}.`;
-  } else {
-    felt.textContent = "Tak for din booking!";
-  }
-</script>
+    // Tekst med booking-info
+    if (aktivitet && antal && dato && tid) {
+      opsummeringFelt.textContent =
+        `Du har booket til ${antal} person(er) d. ${dato} kl. ${tid} til ${aktivitet}.`;
+    } else {
+      opsummeringFelt.textContent = "Tak for din booking!";
+    }
 
-
-
+    // Tilføj adresse hvis vi kender aktiviteten
+    const adr = LOKATIONER[aktivitet];
+    if (adr) {
+      lokationFelt.textContent = "Adresse: " + adr;
+    }
+  </script>
 </body>
 </html>
-

@@ -7,6 +7,22 @@ const router = express.Router();
 const db = require('../utils/db'); // DB
 const { sendOrderConfirmation, sendReminder } = require('../utils/sms');
 
+// Adresse pr. aktivitet
+const ACTIVITY_LOCATIONS = {
+  "Yoga undervisning": "Thorvaldsensvej 3, 1871 Frederiksberg C",
+  "Keramikværksted": "Borups Allé 29, 2200 København N",
+  "Vinsmagning": "Gammel Mønt 4, 1117 København K",
+  "Flødebollekursus": "Ordrupvej 42, 2920 Charlottenlund",
+  "Pilates": "Guldbergsgade 29A, 2. 2200 København N",
+  "Cocktailkursus": "Kløvermarksvej 70 D, 2300 Copenhagen, Denmark",
+  "Bolsjekursus": "Værkstedsgården 13, 2620 Albertslund",
+  "Klatring": "Vildnisset i Søndermarken, 2000 Frederiksberg",
+};
+
+function getLocationForActivity(aktivitet) {
+  return ACTIVITY_LOCATIONS[aktivitet] || "";
+}
+
 //
 // GET /checkout  → booking-siden
 //
@@ -32,8 +48,9 @@ router.post('/', (req, res) => {
     telefon: req.body.telefon,
     bemærkning: req.body.bemærkning,
     smsPaamindelse: req.body.smsPaamindelse,
+    lokation: getLocationForActivity(req.body.aktivitet),   // 👈 NY
   };
-
+  
   console.log('Session efter /checkout (bookingData sat):', req.session);
 
   // GEM I DATABASE (orders)
@@ -164,6 +181,7 @@ router.post('/betal', async (req, res) => {
               tid: booking.tid,
               aktivitet: booking.aktivitet,
               telefon: booking.telefon,
+              lokation: booking.lokation,   // 👈 NY
             });
           } catch (smsErr) {
             console.error('SMS fejl (ordrebekræftelse):', smsErr);
@@ -187,6 +205,8 @@ router.post('/betal', async (req, res) => {
                 tid: booking.tid,
                 aktivitet: booking.aktivitet,
                 telefon: booking.telefon,
+                lokation: booking.lokation,   // 👈 NY
+
               });
 
               // valgfrit: opdatér reminder_sent = 1 i orders

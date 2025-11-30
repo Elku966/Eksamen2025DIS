@@ -31,7 +31,7 @@ function normalizeNumber(telefon) {
   return toNumber;
 }
 
-async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon }) {
+async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon, lokation }) {
   try {
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
       console.error('Twilio ENV mangler! Tjek .env');
@@ -43,7 +43,9 @@ async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon }) {
 
     const smsText =
       `Hej ${navn}! Tak for din booking til ${aktivitet} ` +
-      `d. ${dato} kl. ${tid}. Vi glæder os til at se dig. Du har en skøn oplevelse i vente!`;
+      `d. ${dato} kl. ${tid}.\n` +
+      `Adresse: ${lokation}\n` +
+      `Vi glæder os til at se dig. Du har en skøn oplevelse i vente!`;
 
     const msg = await client.messages.create({
       to: toNumber,
@@ -60,7 +62,8 @@ async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon }) {
   }
 }
 
-async function sendReminder({ navn, aktivitet, dato, tid, telefon }) {
+
+async function sendReminder({ navn, aktivitet, dato, tid, telefon, lokation }) {
   try {
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
       console.error('Twilio ENV mangler! Tjek .env');
@@ -71,8 +74,10 @@ async function sendReminder({ navn, aktivitet, dato, tid, telefon }) {
     const toNumber = normalizeNumber(telefon);
 
     const smsText =
-      `Hej ${navn}! Dette er en påmindelse om din booking: ${aktivitet} ` +
-      `i morgen d. ${dato} kl. ${tid}. Vi ser frem til at byde dig velkommen og give dig en uforglemmelig oplevelse!`;
+      `Hej ${navn}! Dette er en venlig påmindelse om din oplevelse: ${aktivitet} ` +
+      `i morgen d. ${dato} kl. ${tid}.\n` +
+      `Adresse: ${lokation}\n` +
+      `Vi glæder os til at se dig 🌿`;
 
     const msg = await client.messages.create({
       to: toNumber,
@@ -88,5 +93,6 @@ async function sendReminder({ navn, aktivitet, dato, tid, telefon }) {
     return false;
   }
 }
+
 
 module.exports = { sendOrderConfirmation, sendReminder };

@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <title>Booking - SMS-påmindelse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <link rel="stylesheet" href="/stylesheets/checkout.css">
 </head>
 
 <body>
+  <!-- Baggrundsvideo -->
   <div class="video-baggrund">
     <iframe
       src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
@@ -44,8 +44,13 @@
         <option>19:30</option>
       </select>
 
+      <!-- Aktivitet (fra ?event= i URL'en) -->
       <label for="aktivitet">Aktivitet</label>
       <input id="aktivitet" type="text" readonly>
+
+      <!-- NY: Lokation udfyldes automatisk ud fra aktiviteten -->
+      <label for="lokation">Lokation</label>
+      <input id="lokation" type="text" readonly>
 
       <label for="antal">Antal personer</label>
       <input id="antal" type="number" min="1" value="1" required>
@@ -78,17 +83,32 @@
   </div>
 
   <script>
-    //  NYT: Sæt min-dato = i dag (YYYY-MM-DD)
+    // Lokationer pr. aktivitet
+    const LOKATIONER = {
+      "Yoga undervisning": "Thorvaldsensvej 3, 1871 Frederiksberg C",
+      "Keramikværksted": "Borups Allé 29, 2200 København N",
+      "Vinsmagning": "Gammel Mønt 4, 1117 København K",
+      "Flødebollekursus": "Ordrupvej 42, 2920 Charlottenlund",
+      "Pilates": "Guldbergsgade 29A, 2. 2200 København N",
+      "Cocktailkursus": "Kløvermarksvej 70 D, 2300 Copenhagen, Denmark",
+      "Bolsjekursus": "Værkstedsgården 13, 2620 Albertslund",
+      "Klatring": "Vildnisset i Søndermarken, 2000 Frederiksberg",
+    };
+
+    function opdaterLokation() {
+      const aktivitet = document.getElementById('aktivitet').value;
+      document.getElementById('lokation').value = LOKATIONER[aktivitet] || "";
+    }
+
+    // Sæt min-dato = i dag
     (function () {
       const nu = new Date();
       const y = nu.getFullYear();
       const m = String(nu.getMonth() + 1).padStart(2, "0");
       const d = String(nu.getDate()).padStart(2, "0");
-
       const minDato = `${y}-${m}-${d}`;
       document.getElementById("dato").setAttribute("min", minDato);
     })();
-
 
     // Skjul tider der er "fortid", hvis brugeren vælger i dag
     document.getElementById('dato').addEventListener('change', function () {
@@ -104,7 +124,6 @@
 
       const iDag = nu.toISOString().split("T")[0];
 
-      // Hvis dato = i dag → fjern tidligere tidspunkter
       if (valgtDato === iDag) {
         const nuTimer = nu.getHours();
         const nuMin = nu.getMinutes();
@@ -112,18 +131,14 @@
         alleOptioner.forEach(opt => {
           if (!opt.value) return;
           const [h, m] = opt.value.split(":").map(Number);
-
-          // Skjul tidspunkter der er tidligere end nu
           if (h < nuTimer || (h === nuTimer && m < nuMin)) {
             opt.hidden = true;
           }
         });
       }
 
-      // Reset valgt tid
       tidSelect.value = "";
     });
-
 
     // Pris pr. person
     const PRISER = {
@@ -145,15 +160,22 @@
         total > 0 ? total.toLocaleString("da-DK") + " kr." : "";
     }
 
-    // Aktivitet fra URL
+    // Sæt aktivitet (og dermed lokation) ud fra ?event= i URL'en
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');
-      if (eventNavn) {
-        document.getElementById('overskrift').textContent =
-          "Afslut din booking for " + eventNavn;
-        document.getElementById('aktivitet').value = eventNavn;
+      const overskrift = document.getElementById('overskrift');
+      const aktivitetInput = document.getElementById('aktivitet');
+
+      if (eventNavn && aktivitetInput) {
+        overskrift.textContent = "Afslut din booking for " + eventNavn;
+        aktivitetInput.value = eventNavn;
+        opdaterLokation(); // 👈 udfyld adresse
+      } else {
+        aktivitetInput.value = "";
+        document.getElementById('lokation').value = "";
       }
+
       opdaterPris();
     })();
 
@@ -164,7 +186,7 @@
       felt.style.display = felt.style.display === 'block' ? 'none' : 'block';
     });
 
-    // Form submit
+    // Håndter submit af booking-formularen
     document.getElementById('booking-formular').addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -175,6 +197,7 @@
         dato: document.getElementById('dato').value,
         tid: document.getElementById('tid').value,
         aktivitet: document.getElementById('aktivitet').value,
+        lokation: document.getElementById('lokation').value,
         antal: document.getElementById('antal').value,
         totalPris: document.getElementById('total-pris').value,
         telefon: document.getElementById('telefon').value,
@@ -203,11 +226,11 @@
 
         window.location.href = "/checkout/betaling?" + activityParams.toString();
 
-      } catch {
+      } catch (err) {
+        console.error(err);
         besked.textContent = "Netværksfejl - kunne ikke kontakte serveren.";
       }
     });
   </script>
-
 </body>
 </html>

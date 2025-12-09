@@ -1,4 +1,7 @@
-require('dotenv').config();
+
+require('dotenv').config(); //Indelæser miljø variabler fra .env filen 
+
+//Importerer nødvendige moduler
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
@@ -10,52 +13,51 @@ const responseTime = require('response-time');
 
 const app = express();
 
-// Mål svartid (valgfrit, men fint til load balancer)
+//Måling af svartid
 app.use(responseTime());
 
-// Session (MemoryStore – ingen Redis)
+//Session håndtering
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'very-secret-session-key',
-    resave: false,
-    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || 'very-secret-session-key', //Hemmelig nøgle
+    resave: false, //Gem ikke sessions hvis den ikke ændres
+    saveUninitialized: false, //opret ikke tomme sessions
     cookie: {
-      secure: false,            // bag load balancer kunne du sætte den til true
-      maxAge: 1000 * 60 * 60    // 1 time
+      secure: false,            
+      maxAge: 1000 * 60 * 60 //Session varer 1 time
     }
   })
 );
 
-// Routers
+//Importerer routers
 const indexRouter = require('./routes/index');
 const checkoutRouter = require('./routes/checkout');
-const usersRouter = require('./routes/users');
 
-// ----- Middleware -----
+//Middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 
-// Statisk frontend (public-mappen)
+//Gør alle mapper i frontenten tilgængelige i browseren 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ----- Health check til load balancer -----
+//Health check til load balancer
 app.get('/health', (req, res) => {
   res.send('OK');
 });
 
-// ----- Routes -----
+//Routes
 app.use('/', indexRouter);
 app.use('/checkout', checkoutRouter);
-app.use('/users', usersRouter);
 
-// ----- 404 og fejl-håndtering -----
+//Fejl-håndtering 
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
+//Generel fejl-håndtering
 app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

@@ -5,13 +5,11 @@
   <title>Betaling – Understory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Brug samme styling som checkout -->
   <link rel="stylesheet" href="/stylesheets/checkout.css">
 </head>
 
 <body>
 
-  <!-- Baggrundsvideo -->
   <div class="video-baggrund">
     <iframe
       src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
@@ -21,7 +19,7 @@
     ></iframe>
   </div>
 
-  <!-- Indholdsboks -->
+  <!--Betalingsformularen-->
   <div class="indhold">
     <h1>Betaling</h1>
     <p class="undertekst">Indtast dine kortoplysninger for at færdiggøre bookingen.</p>
@@ -32,17 +30,17 @@
       <input id="kortnavn" type="text" required placeholder="Fornavn Efternavn">
 
       <label for="kortnummer">Kortnummer</label>
-      <input id="kortnummer" type="text" maxlength="19" inputmode="numeric" placeholder="1234 5678 9012 3456" required>
+      <input id="kortnummer" type="text" maxlength="16" inputmode="numeric" placeholder="1234 5678 9012 3456" required> <!--Begrænsning på 16-->
 
       <div style="display: flex; gap: 10px;">
         <div style="flex: 1;">
           <label for="udløb">Udløbsdato</label>
-          <input id="udløb" type="text" maxlength="5" placeholder="MM/ÅÅ" required>
+          <input id="udløb" type="text" maxlength="5" placeholder="MM/ÅÅ" required> <!--Begrænsning på 5-->
         </div>
 
         <div style="flex: 1;">
           <label for="cvc">CVC</label>
-          <input id="cvc" type="password" maxlength="3" placeholder="•••" required>
+          <input id="cvc" type="password" maxlength="3" placeholder="•••" required> <!--Bregrænsning på 3 og har placeholder så brugerens CVC ikke kan ses fordi det krypteres i databasen-->
         </div>
       </div>
 
@@ -52,36 +50,35 @@
     <p id="besked"></p>
   </div>
 
-  <!-- JavaScript til betaling -->
+  <!--JavaScript til betaling -->
 <script>
 
+  //Inputsfeltet for udløbsdatoen
   const expiryInput = document.getElementById('udløb');
 
   expiryInput.addEventListener('input', (e) => {
-    let value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, ''); //Sletter alt det der ikke er tal
 
-    // Max 4 cifre (MMÅÅ)
+    //Max 4 cifre
     if (value.length > 4) value = value.slice(0, 4);
 
-    // --------------- FORHINDR MÅNED > 12 -----------------
+    //Sikrer at måneden aldrig kommer over 12
     if (value.length >= 1) {
       let month = parseInt(value.slice(0, 2), 10);
 
-      // Auto-ret: 0 → 01
       if (month === 0) month = 1;
 
       if (month > 12) {
-        month = 12; // Auto-retter hvis man skriver fx 15
+        month = 12;
       }
 
-      // Gendan værdien
+      //Sætter korrekt måned tilbage
       if (value.length >= 2) {
         value = month.toString().padStart(2, '0') + value.slice(2);
       }
     }
-    // -----------------------------------------------------
-
-    // Begræns år til max 30 (dvs. 2030)
+    
+    //Sørg for at året ikke er over 30
     if (value.length === 4) {
       const year = parseInt(value.slice(2, 4), 10);
       if (year > 30) {
@@ -89,7 +86,7 @@
       }
     }
 
-    // Formatér som MM/ÅÅ
+    //Formater som MM/ÅÅ
     if (value.length >= 3) {
       e.target.value = value.slice(0, 2) + '/' + value.slice(2);
     } else {
@@ -98,7 +95,7 @@
   });
 
 
-
+  //Funktion der tjekker om udløbsdatoen er gyldig
   function validateExpiry(value) {
     const match = /^(\d{2})\/(\d{2})$/.exec(value);
     if (!match) return { ok: false, message: "Brug formatet MM/ÅÅ, fx 03/27." };
@@ -110,15 +107,18 @@
       return { ok: false, message: "Måneden skal være mellem 01 og 12." };
     }
 
+    //Tillader årstal mellem 2025 og 2030
     if (yearShort < 25 || yearShort > 30) {
       return { ok: false, message: "Årstallet skal være mellem 25 og 30." };
     }
 
+    //Tjek om kortet allerede er udløbet i forhold til dagens dato 
     const year = 2000 + yearShort;
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
+  //Hvis årstallet er før nu eller samme år men tidligere måned så er kortet udløbet 
     if (year < currentYear || (year === currentYear && month < currentMonth)) {
       return { ok: false, message: "Kortet er udløbet." };
     }
@@ -127,21 +127,23 @@
   }
 
 
-
+  //Når man trykker "gennemfør betaling" så kører denne funktion. 
   document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const besked = document.getElementById('besked');
-    besked.textContent = "";
+    besked.textContent = ""; //ryd beskedfeltet hver gang der forsøges betaling 
 
+  //Tager værdien fra udløbsfeltet og validerer med validateExpiry funktionen
     const expiryValue = expiryInput.value.trim();
     const validation = validateExpiry(expiryValue);
 
-    if (!validation.ok) {
+    if (!validation.ok) { //Hvis validateExpiry retunerere false, vises fejlbeskeden
       besked.textContent = validation.message;
       return;
     }
 
+    //Vi pakker alle betalingsoplysningerne ind i et data objekt som vi sender til backenden i en POST request
     const data = {
       kortnavn: document.getElementById('kortnavn').value,
       kortnummer: document.getElementById('kortnummer').value,
@@ -149,6 +151,7 @@
       cvc: document.getElementById('cvc').value
     };
 
+    //Sender data til serevren via fetch POST
     try {
       const res = await fetch('/checkout/betal', {
         method: 'POST',
@@ -156,15 +159,17 @@
         body: JSON.stringify(data)
       });
 
-      const result = await res.json();
+      const result = await res.json(); //Læser json svar fra serveren
 
+  //Hvis serveren svarer med success, skal brugeren sendes videre til checkout/gennemfoert
+  //Window.location.search bevarer eventuelle query parametre i url'en
       if (result.success) {
         window.location.href = "/checkout/gennemfoert" + window.location.search;
-      } else {
+      } else { //Hvis betaling fejlede vis denne besked
         besked.textContent = result.message || "Betaling blev ikke godkendt.";
       }
 
-    } catch (err) {
+    } catch (err) { //Hvis fetch fejler vis generel fejl 
       console.error(err);
       besked.textContent = "Betaling kunne ikke gennemføres (netværksfejl).";
     }

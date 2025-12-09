@@ -59,13 +59,13 @@ body {
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
   }
   
-  .note {
+  .note { /*Afstand mellem tekst*/
     margin-top: 20px;
     font-size: 0.9rem;
     opacity: 0.85;
   }
   
-  /* KONFETTI */
+
   .confetti {
     width: 10px;
     height: 10px;
@@ -78,12 +78,12 @@ body {
     z-index: 1;
   }
   
-  @keyframes drop {
+  @keyframes drop { /*Animation for konfetti der falder*/
     0% { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
   }
   
-  /* Blade */
+  /*Konfetti blade*/
   .leaf {
     position: fixed;
     top: -40px;
@@ -96,7 +96,7 @@ body {
     z-index: 1;
   }
   
-  @keyframes leafFall {
+  @keyframes leafFall { /*Animation for konfetto der falder*/
     0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(120vh) rotate(340deg); opacity: 0; }
   }

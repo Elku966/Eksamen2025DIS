@@ -66,13 +66,13 @@
     text-align: center;
   }
   
-  label { 
+  label { /*Labels til bokse*/
     display: block;
     margin: 8px 0 5px;
     font-weight: 600;
   }
   
-  input, textarea, select {
+  input, textarea, select { /*Længen af boksene*/
     width: 100%;
     padding: 8px 10px;
     border: 1px solid var(--kant);

@@ -10,6 +10,7 @@
 </head>
 
 <body>
+  <!--Hovedboksen med bekræftelsesbesked-->
   <main class="boks">
     <h1>Tak for din booking 🌿</h1>
 
@@ -25,19 +26,20 @@
       Har du spørgsmål eller brug for at ændre din tid, kan du altid gå tilbage til bookingsiden.
     </p>
 
-    <!-- Her skriver vi opsummering + adresse ind via JS -->
+    <!--Skriver opsummering og adresse ind via JS-->
     <p id="opsummering" class="note"></p>
     <p id="gennemfoert-lokation" class="note"></p>
 
     <a class="knap" href="/">Tilbage til forside</a>
   </main>
 
-  <!-- 🎉 Konfetti + blade-effekt -->
+  
   <script>
     function random(min, max) {
-      return Math.random() * (max - min) + min;
+      return Math.random() * (max - min) + min; //Bruges til at placerer konfetti forskellige steder på skærmen 
     }
 
+    //Funktionen der skaber og animerer konfetti-elementer
     function createConfetti() {
       for (let i = 0; i < 30; i++) {
         const c = document.createElement("div");
@@ -51,6 +53,7 @@
       }
     }
 
+    //Funktionen der skaber og animerer bladelementer 
     function createLeaves() {
       for (let i = 0; i < 10; i++) {
         const leaf = document.createElement("div");
@@ -64,11 +67,11 @@
       }
     }
 
+    //Start animationerne når siden indlæses
     createConfetti();
     createLeaves();
   </script>
 
-  <!-- 🔎 Opsummering + lokation -->
   <script>
     const LOKATIONER = {
       "Yoga undervisning": "Thorvaldsensvej 3, 1871 Frederiksberg C",
@@ -81,17 +84,18 @@
       "Klatring": "Vildnisset i Søndermarken, 2000 Frederiksberg",
     };
 
-    // Læs parametre fra URL
+    //læs parametre fra URL
     const urlParams = new URLSearchParams(window.location.search);
     const aktivitet = urlParams.get("aktivitet");
     const antal = urlParams.get("antal");
     const dato = urlParams.get("dato");
     const tid = urlParams.get("tid");
 
+    //Felter på siden der skal opdateres
     const opsummeringFelt = document.getElementById("opsummering");
     const lokationFelt = document.getElementById("gennemfoert-lokation");
 
-    // Tekst med booking-info
+    //Viser en opsummering hvis der findes booking data
     if (aktivitet && antal && dato && tid) {
       opsummeringFelt.textContent =
         `Du har booket til ${antal} person(er) d. ${dato} kl. ${tid} til ${aktivitet}.`;
@@ -99,7 +103,7 @@
       opsummeringFelt.textContent = "Tak for din booking!";
     }
 
-    // Tilføj adresse hvis vi kender aktiviteten
+    //Tilføj adresse hvis vi kender aktiviteten
     const adr = LOKATIONER[aktivitet];
     if (adr) {
       lokationFelt.textContent = "Adresse: " + adr;

@@ -1,30 +1,29 @@
-// utils/sms.js
 const twilio = require('twilio');
 
-const {
+const { //Henter Twilio nøgler fra ENV
   TWILIO_ACCOUNT_SID,
   TWILIO_AUTH_TOKEN,
   TWILIO_PHONE_NUMBER
 } = process.env;
 
-// Lille hjælp til at normalisere telefonnumre til E.164 (DK)
+//Normalisere telefonnumre til E.164 (DK)
 function normalizeNumber(telefon) {
   let toNumber = (telefon || '').toString().trim();
 
-  // Fjern mellemrum
+  //Fjern mellemrum
   toNumber = toNumber.replace(/\s+/g, '');
 
-  // Hvis 8 cifre → antag dansk
+  //Hvis 8 cifre, tilføj +45
   if (/^\d{8}$/.test(toNumber)) {
     return '+45' + toNumber;
   }
 
-  // Hvis starter med 0xxxxxxx → +45xxxxxxx
+  //Hvis nummeret starter med 0xxxxxxx så skriv +45xxxxxxx
   if (toNumber.startsWith('0')) {
     return '+45' + toNumber.slice(1);
   }
 
-  // Hvis allerede starter med + → behold
+  //Hvis nummeret allerede starter med + så behold
   if (toNumber.startsWith('+')) {
     return toNumber;
   }
@@ -32,24 +31,24 @@ function normalizeNumber(telefon) {
   return toNumber;
 }
 
-// 👇 Ordrebekræftelse med adresse
+//Ordrebekræftelse med adresse efter betaling
 async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon, lokation }) {
   try {
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
+    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) { //Sikrer at alle Twilio ENV variabler er tilgængelige
       console.error('Twilio ENV mangler! Tjek .env');
       return false;
     }
 
-    const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-    const toNumber = normalizeNumber(telefon);
-    const lokationTekst = lokation ? ` på ${lokation}` : '';
+    const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN); //Opret klient
+    const toNumber = normalizeNumber(telefon); //Normaliser telefonnummer 
+    const lokationTekst = lokation ? ` på ${lokation}` : ''; //Adressetekst kun hvis lokation findes
 
-    const smsText =
+    const smsText = //SMS indholdet
       `Hej ${navn}! Tak for din booking til ${aktivitet} ` +
       `d. ${dato} kl. ${tid}${lokationTekst}. Vi glæder os til at se dig. ` +
       `Du har en skøn oplevelse i vente!`;
 
-    const msg = await client.messages.create({
+    const msg = await client.messages.create({ //Send SMS via Twilio API
       to: toNumber,
       from: TWILIO_PHONE_NUMBER,
       body: smsText
@@ -64,7 +63,8 @@ async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon, loka
   }
 }
 
-// 👇 Påmindelse 24 timer før – også med adresse
+
+//Påmindelse 24 timer før - funktionen kaldes kun hvis brugeren har sat flueben
 async function sendReminder({ navn, aktivitet, dato, tid, telefon, lokation }) {
   try {
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {

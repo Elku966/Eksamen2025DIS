@@ -1,15 +1,15 @@
 config:
-  target: "http://localhost:3000"
+  target: "http://localhost:3000" #Adressen som load-testen skal sende request til
   phases:
-    - duration: 20
-      arrivalRate: 5
+    - duration: 20 #Testen kører i 20 sekunder
+      arrivalRate: 5 #Sender 5 nye brugere per sekund
 
 scenarios:
-  - name: "Betaling POST"
+  - name: "Betaling POST" #Navn på testen 
     flow:
       - post:
-          url: "/checkout/betal"
-          json:
+          url: "/checkout/betal" #Endpoint der testes
+          json: #Data der sendes med i POST-bodyen
             kortnavn: "Tester Testesen"
             kortnummer: "4242424242424242"
             udløb: "12/25"

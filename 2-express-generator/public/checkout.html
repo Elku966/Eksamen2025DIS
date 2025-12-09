@@ -8,7 +8,7 @@
 </head>
 
 <body>
-  <!-- Baggrundsvideo -->
+  <!--baggrundsvideo-->
   <div class="video-baggrund">
     <iframe
       src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
@@ -18,12 +18,14 @@
     ></iframe>
   </div>
 
-  <div class="indhold">
+
+  <div class="indhold"> <!--kort intro til formularen-->
     <h1 id="overskrift">Afslut din booking</h1>
     <p class="undertekst">
       Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.
     </p>
 
+    <!--bookingformular-->
     <form id="booking-formular">
       <label for="navn">Navn</label>
       <input id="navn" type="text" required>
@@ -44,17 +46,18 @@
         <option>19:30</option>
       </select>
 
-      <!-- Aktivitet (fra ?event= i URL'en) -->
+      <!--aktiviteten bliver automatisk udfyldt fra URL'en-->
       <label for="aktivitet">Aktivitet</label>
       <input id="aktivitet" type="text" readonly>
 
-      <!-- NY: Lokation udfyldes automatisk ud fra aktiviteten -->
+      <!--lokationen udfyldes automatisk ud fra aktiviteten-->
       <label for="lokation">Lokation</label>
       <input id="lokation" type="text" readonly>
 
       <label for="antal">Antal personer</label>
       <input id="antal" type="number" min="1" value="1" required>
 
+      <!--automatisk beregnet pris ud fra antal-->
       <label for="total-pris">Samlet pris</label>
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
@@ -68,11 +71,13 @@
         required
       >
 
+      <!--Mulighed for SMS påmindelse-->
       <div class="afkrydsning">
         <input id="sms-påmindelse" type="checkbox">
         <label for="sms-påmindelse">Ja tak, send SMS-påmindelse</label>
       </div>
 
+      <!--Mulighed for bemærkning-->
       <span class="bemærkning-knap" id="åbn-bemærkning">Eventuelle bemærkninger</span>
       <textarea id="bemærkning-felt" placeholder="Skriv din kommentar her..."></textarea>
 
@@ -82,8 +87,9 @@
     <p id="besked"></p>
   </div>
 
+
   <script>
-    // Lokationer pr. aktivitet
+    //Liste over lokationer der er koblet til aktiviteter
     const LOKATIONER = {
       "Yoga undervisning": "Thorvaldsensvej 3, 1871 Frederiksberg C",
       "Keramikværksted": "Borups Allé 29, 2200 København N",
@@ -95,12 +101,13 @@
       "Klatring": "Vildnisset i Søndermarken, 2000 Frederiksberg",
     };
 
+    //Opdater lokationen når aktiviteten ændre sig 
     function opdaterLokation() {
       const aktivitet = document.getElementById('aktivitet').value;
       document.getElementById('lokation').value = LOKATIONER[aktivitet] || "";
     }
 
-    // Sæt min-dato = i dag
+    //Sørger for at datoen ikke kan sættes før dagens dato
     (function () {
       const nu = new Date();
       const y = nu.getFullYear();
@@ -110,14 +117,14 @@
       document.getElementById("dato").setAttribute("min", minDato);
     })();
 
-    // Skjul tider der er "fortid", hvis brugeren vælger i dag
+    //hvis brugeren vælger idag, skjules passerede tider
     document.getElementById('dato').addEventListener('change', function () {
       const valgtDato = this.value;
       const nu = new Date();
       const tidSelect = document.getElementById('tid');
       const alleOptioner = tidSelect.querySelectorAll("option");
 
-      // Reset alle tider = vis alt igen
+      //Når datoen ændres vis alle tiderne igen og skjul dem der allerede er passeret 
       alleOptioner.forEach(opt => opt.hidden = false);
 
       if (!valgtDato) return;
@@ -140,7 +147,7 @@
       tidSelect.value = "";
     });
 
-    // Pris pr. person
+    //Standardpriser for aktiviteterne
     const PRISER = {
       "Yoga undervisning": 199,
       "Keramikværksted": 249,
@@ -152,6 +159,7 @@
       "Klatring": 229
     };
 
+    //beregner totalpris ud fra antal personer
     function opdaterPris() {
       const aktivitet = document.getElementById('aktivitet').value;
       const antal = parseInt(document.getElementById('antal').value, 10) || 0;
@@ -160,7 +168,7 @@
         total > 0 ? total.toLocaleString("da-DK") + " kr." : "";
     }
 
-    // Sæt aktivitet (og dermed lokation) ud fra ?event= i URL'en
+    //henter aktivitet fra URL og indsætter både aktivitet og adresse
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');
@@ -170,7 +178,7 @@
       if (eventNavn && aktivitetInput) {
         overskrift.textContent = "Afslut din booking for " + eventNavn;
         aktivitetInput.value = eventNavn;
-        opdaterLokation(); // 👈 udfyld adresse
+        opdaterLokation(); 
       } else {
         aktivitetInput.value = "";
         document.getElementById('lokation').value = "";
@@ -181,17 +189,19 @@
 
     document.getElementById('antal').addEventListener('input', opdaterPris);
 
+    //Fold bemærkningsfeltet ind og ud ved klik
     document.getElementById('åbn-bemærkning').addEventListener('click', () => {
       const felt = document.getElementById('bemærkning-felt');
       felt.style.display = felt.style.display === 'block' ? 'none' : 'block';
     });
 
-    // Håndter submit af booking-formularen
+    //Når brugeren indsender bookingformularen, sendes data til backend
     document.getElementById('booking-formular').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const besked = document.getElementById('besked');
 
+      //Pakker alle brugeren oplysninger i et objekt 
       const data = {
         navn: document.getElementById('navn').value,
         dato: document.getElementById('dato').value,
@@ -217,6 +227,7 @@
           return;
         }
 
+        //Send brugeren videre til betalingsside med bookingdata som query parametre
         const activityParams = new URLSearchParams({
           aktivitet: data.aktivitet,
           antal: data.antal,

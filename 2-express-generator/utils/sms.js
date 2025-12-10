@@ -1,5 +1,7 @@
 // utils/sms.js
 const twilio = require('twilio');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
 
 const {
   TWILIO_ACCOUNT_SID,

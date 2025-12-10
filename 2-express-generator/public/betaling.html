@@ -78,7 +78,7 @@
       }
     }
     
-    //Sørg for at året ikke er over 30
+    //Sørger for at året ikke er over 30
     if (value.length === 4) {
       const year = parseInt(value.slice(2, 4), 10);
       if (year > 30) {
@@ -118,7 +118,7 @@
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-  //Hvis årstallet er før nu eller samme år men tidligere måned så er kortet udløbet 
+  //Hvis årstallet er før dagen idag eller samme år men tidligere måned så er kortet udløbet 
     if (year < currentYear || (year === currentYear && month < currentMonth)) {
       return { ok: false, message: "Kortet er udløbet." };
     }
@@ -127,12 +127,12 @@
   }
 
 
-  //Når man trykker "gennemfør betaling" så kører denne funktion. 
+  //Når man trykker "gennemfør betaling" så kører denne funktion 
   document.getElementById('betaling-formular').addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const besked = document.getElementById('besked');
-    besked.textContent = ""; //ryd beskedfeltet hver gang der forsøges betaling 
+    besked.textContent = ""; //Ryd beskedfeltet hver gang der forsøges betaling 
 
   //Tager værdien fra udløbsfeltet og validerer med validateExpiry funktionen
     const expiryValue = expiryInput.value.trim();

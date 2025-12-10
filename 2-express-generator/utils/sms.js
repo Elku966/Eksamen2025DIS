@@ -1,6 +1,6 @@
 const twilio = require('twilio');
 
-const { //Henter Twilio nøgler fra ENV
+const { //Henter Twilio nøgler fra .env filen
   TWILIO_ACCOUNT_SID,
   TWILIO_AUTH_TOKEN,
   TWILIO_PHONE_NUMBER
@@ -34,7 +34,7 @@ function normalizeNumber(telefon) {
 //Ordrebekræftelse med adresse efter betaling
 async function sendOrderConfirmation({ navn, aktivitet, dato, tid, telefon, lokation }) {
   try {
-    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) { //Sikrer at alle Twilio ENV variabler er tilgængelige
+    if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) { //Sikrer at alle Twilio env variabler er tilgængelige
       console.error('Twilio ENV mangler! Tjek .env');
       return false;
     }

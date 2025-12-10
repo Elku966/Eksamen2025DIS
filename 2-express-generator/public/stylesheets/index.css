@@ -1,4 +1,4 @@
-:root{ /*globale CSS variabler*/
+:root{ /*Globale CSS variabler*/
     --kort-rgba: rgba(255,255,255,0.82);
     --tekst:#ffffff;
     --dæmpet:#d1d5db;
@@ -39,7 +39,7 @@
     pointer-events:none;
   }
   
-  .indhold{ /*Centrer indholdet*/
+  .indhold{ /*Centrerer indholdet*/
     max-width:1200px; 
     margin:40px auto; 
     padding:0 20px; 

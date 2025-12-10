@@ -160,7 +160,7 @@ router.post('/betal', async (req, res) => {
               dato: booking.dato,
               tid: booking.tid,
               aktivitet: booking.aktivitet,
-              lokation: booking.lokation,  // 👈 NY
+              lokation: booking.lokation,  
               telefon: booking.telefon,
             });
           } catch (smsErr) {

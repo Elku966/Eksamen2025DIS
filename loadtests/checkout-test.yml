@@ -1,17 +1,17 @@
 config:
-  target: "http://localhost:3000"
+  target: "http://localhost:3000" #Adressen som load-testen skal sende request til
   phases:
-    - duration: 30
-      arrivalRate: 8
+    - duration: 30 #Testen kører i 30 sekunder
+      arrivalRate: 8 #Sender 8 nye brugere per sekund
 
 scenarios:
-  - name: "Checkout GET + POST"
+  - name: "Checkout GET + POST" #Navn på testen
     flow:
       - get:
-          url: "/checkout"
+          url: "/checkout" #Endpoint der testes
 
       - post:
-          url: "/checkout"
+          url: "/checkout" #Endpoint der testes
           json:
             navn: "Test Person"
             dato: "2025-01-01"

@@ -8,7 +8,7 @@
 </head>
 
 <body>
-  <!--baggrundsvideo-->
+  <!--Baggrundsvideo-->
   <div class="video-baggrund">
     <iframe
       src="https://www.youtube.com/embed/kSJ8D8S5B9s?autoplay=1&mute=1&controls=0&loop=1&playlist=kSJ8D8S5B9s&modestbranding=1&showinfo=0"
@@ -19,13 +19,13 @@
   </div>
 
 
-  <div class="indhold"> <!--kort intro til formularen-->
+  <div class="indhold"> <!--Kort intro til formularen-->
     <h1 id="overskrift">Afslut din booking</h1>
     <p class="undertekst">
       Udfyld felterne. Sæt flueben hvis du vil have en SMS-påmindelse 24 timer før.
     </p>
 
-    <!--bookingformular-->
+    <!--Bookingformular-->
     <form id="booking-formular">
       <label for="navn">Navn</label>
       <input id="navn" type="text" required>
@@ -46,18 +46,18 @@
         <option>19:30</option>
       </select>
 
-      <!--aktiviteten bliver automatisk udfyldt fra URL'en-->
+      <!--Aktiviteten bliver automatisk udfyldt fra URL'en-->
       <label for="aktivitet">Aktivitet</label>
       <input id="aktivitet" type="text" readonly>
 
-      <!--lokationen udfyldes automatisk ud fra aktiviteten-->
+      <!--Lokationen udfyldes automatisk ud fra aktiviteten-->
       <label for="lokation">Lokation</label>
       <input id="lokation" type="text" readonly>
 
       <label for="antal">Antal personer</label>
       <input id="antal" type="number" min="1" value="1" required>
 
-      <!--automatisk beregnet pris ud fra antal-->
+      <!--Automatisk beregnet pris ud fra antal-->
       <label for="total-pris">Samlet pris</label>
       <input id="total-pris" type="text" readonly placeholder="Beregn pris ud fra antal">
 
@@ -117,7 +117,7 @@
       document.getElementById("dato").setAttribute("min", minDato);
     })();
 
-    //hvis brugeren vælger idag, skjules passerede tider
+    //Hvis brugeren vælger idag, skjules passerede tider
     document.getElementById('dato').addEventListener('change', function () {
       const valgtDato = this.value;
       const nu = new Date();
@@ -159,7 +159,7 @@
       "Klatring": 229
     };
 
-    //beregner totalpris ud fra antal personer
+    //Beregner totalpris ud fra antal personer
     function opdaterPris() {
       const aktivitet = document.getElementById('aktivitet').value;
       const antal = parseInt(document.getElementById('antal').value, 10) || 0;
@@ -168,7 +168,7 @@
         total > 0 ? total.toLocaleString("da-DK") + " kr." : "";
     }
 
-    //henter aktivitet fra URL og indsætter både aktivitet og adresse
+    //Henter aktivitet fra URL og indsætter både aktivitet og adresse
     (function () {
       const params = new URLSearchParams(window.location.search);
       const eventNavn = params.get('event');

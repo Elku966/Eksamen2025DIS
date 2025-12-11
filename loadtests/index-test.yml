@@ -2,7 +2,7 @@ config:
   target: "http://localhost:3000" #Adressen som load-testen skal sende request til
   phases:
     - duration: 20 #Testen kører i 20 sekunder
-      arrivalRate: 10 #Sender 10 nye brugere per sekund
+      arrivalRate: 5 #Sender 5 nye brugere per sekund
 
 scenarios:
   - flow:
